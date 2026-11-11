@@ -197,15 +197,15 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.lblTitle.setText(QCoreApplication.translate("MainWindow", u"OS Simulator", None))
-        self.lblSubtitle.setText(QCoreApplication.translate("MainWindow", u"Operating Systems Learning Lab", None))
-        self.btnPaging.setText(QCoreApplication.translate("MainWindow", u"Paging", None))
-        self.btnPageReplacement.setText(QCoreApplication.translate("MainWindow", u"Page Replacement", None))
-        self.btnBankers.setText(QCoreApplication.translate("MainWindow", u"Banker's Algorithm", None))
-        self.btnSegmentation.setText(QCoreApplication.translate("MainWindow", u"Segmentation", None))
-        self.btnCpuScheduling.setText(QCoreApplication.translate("MainWindow", u"CPU Scheduling", None))
-        self.btnFragmentation.setText(QCoreApplication.translate("MainWindow", u"Fragmentation", None))
-        self.btnDiskScheduling.setText(QCoreApplication.translate("MainWindow", u"Disk Scheduling", None))
-        self.btnMultiprogramming.setText(QCoreApplication.translate("MainWindow", u"Multiprogramming", None))
+        self.lblTitle.setText(QCoreApplication.translate("MainWindow", u"OS Simulator ヾ(≧▽≦*)o", None))
+        self.lblSubtitle.setText(QCoreApplication.translate("MainWindow", u"made with love by: ange, neetocat & CHR !!", None))
+        self.btnPaging.setText(QCoreApplication.translate("MainWindow", u"♡ Paging", None))
+        self.btnPageReplacement.setText(QCoreApplication.translate("MainWindow", u"♡ Page Replacement", None))
+        self.btnBankers.setText(QCoreApplication.translate("MainWindow", u"♡ Banker's Algorithm", None))
+        self.btnSegmentation.setText(QCoreApplication.translate("MainWindow", u"♡ Segmentation", None))
+        self.btnCpuScheduling.setText(QCoreApplication.translate("MainWindow", u"♡ CPU Scheduling", None))
+        self.btnFragmentation.setText(QCoreApplication.translate("MainWindow", u"♡ Fragmentation", None))
+        self.btnDiskScheduling.setText(QCoreApplication.translate("MainWindow", u"♡ Disk Scheduling", None))
+        self.btnMultiprogramming.setText(QCoreApplication.translate("MainWindow", u"♡ Multiprogramming", None))
     # retranslateUi
 
