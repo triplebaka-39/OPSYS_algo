@@ -1,6 +1,7 @@
 
 import sys
 
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
@@ -10,6 +11,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
 )
 
+from module.bankers import BankersWindow
 from ui_main_window import Ui_MainWindow
 
 
@@ -126,7 +128,10 @@ class MainWindow(QMainWindow):
 
     def open_module(self, module_name):
 
-        window = ModuleWindow(module_name)
+        if module_name == "Banker's Algorithm":
+            window = BankersWindow(self)
+        else:
+            window = ModuleWindow(module_name)
 
         # Retain reference while window is open
         self.module_windows.append(window)
@@ -147,6 +152,7 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)
+    app.setFont(QFont("Inter"))
 
     window = MainWindow()
     window.show()
