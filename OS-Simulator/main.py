@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
 
 from module.cpu_scheduling import CpuSchedulingWindow
 from module.bankers import BankersWindow
+from module.page_replacement import PageReplacementWindow
 from ui_main_window import Ui_MainWindow
 
 
@@ -101,7 +102,7 @@ class MainWindow(QMainWindow):
         )
 
         self.ui.btnPageReplacement.clicked.connect(
-            lambda: self.open_module("Page Replacement")
+            self.open_page_replacement
         )
 
         self.ui.btnSegmentation.clicked.connect(
@@ -150,6 +151,19 @@ class MainWindow(QMainWindow):
         window = CpuSchedulingWindow(self)
 
         # Retain reference while the CPU scheduling window is open
+        self.module_windows.append(window)
+
+        window.finished.connect(
+            lambda: self.module_windows.remove(window)
+            if window in self.module_windows else None
+        )
+
+        window.show()
+    
+    def open_page_replacement(self):
+
+        window = PageReplacementWindow(self)
+
         self.module_windows.append(window)
 
         window.finished.connect(
