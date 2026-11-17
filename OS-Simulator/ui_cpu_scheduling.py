@@ -25,8 +25,22 @@ class Ui_Dialog(object):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
         Dialog.resize(900, 820)
-        Dialog.setStyleSheet(u"QDialog { background-color: #FFF0F3; color: #704653; font-family: \"Segoe UI\"; } QLabel { color: #704653; background: transparent; } QLabel#lblTitle { color: #C45B7A; font-size: 23pt; font-weight: bold; } QLabel#lblInput, QLabel#lblResults, QLabel#lblGantt { color: #C45B7A; font-size: 13pt; font-weight: bold; } QPushButton { background-color: #FFDCE6; color: #87475D; border: 1px solid #F3B5C8; border-radius: 9px; padding: 8px; font-weight: bold; } QPushButton:hover { background-color: #FFC4D6; } QPushButton:pressed { background-color: #F2A9C0; } QTableWidget { background-color: #FFFAFC; alternate-background-color: #FFF0F4; color: #704653; gridline-color: #F0C6D3; border: 1px solid #EABAC9; border-radius: 8px; } QHeaderView::section { background-color: #F8D4E0; color: #784254; padding: 7px; border: none; font-weight: bold; } QComboBox, QSpinBox { background-color: #FFFAFC; color: #704653; border: 1px solid #EABAC9; border-radius: 8px; padding: 6px; } QComboBox QAbstractItemView { background-color: #FFFAFC; col"
-                        "or: #704653; selection-background-color: #F2A9C0; selection-color: #704653; outline: 0; } QComboBox QAbstractItemView::item { color: #704653; min-height: 28px; padding: 5px; }")
+        Dialog.setStyleSheet(u"\n"
+"QDialog { background-color: #FFF0F3; color: #704653; font-family: \"Nunito\"; font-size: 10pt; }\n"
+"QWidget { font-family: \"Nunito\"; }\n"
+"QLabel { color: #704653; background: transparent; font-size: 10pt; }\n"
+"QLabel#lblTitle { color: #C45B7A; font-size: 24pt; font-weight: 700; }\n"
+"QLabel#lblInput, QLabel#lblResults, QLabel#lblGantt { color: #C45B7A; font-size: 13pt; font-weight: 700; }\n"
+"QPushButton { background-color: #FFDCE6; color: #87475D; border: 1px solid #F3B5C8; border-radius: 9px; padding: 8px; font-size: 10pt; font-weight: 600; }\n"
+"QPushButton:hover { background-color: #FFC4D6; }\n"
+"QPushButton:pressed { background-color: #F2A9C0; }\n"
+"QTableWidget { background-color: #FFFAFC; alternate-background-color: #FFF0F4; color: #704653; gridline-color: #F0C6D3; border: 1px solid #EABAC9; border-radius: 8px; font-size: 10pt; }\n"
+"QHeaderView::section { background-color: #F8D4E0; color: #784254; padding: 7px; border: none; font-size: 10pt; font-weight: 700; }\n"
+"QComboBox, QSpinBox { backg"
+                        "round-color: #FFFAFC; color: #704653; border: 1px solid #EABAC9; border-radius: 8px; padding: 6px; font-size: 10pt; }\n"
+"QComboBox QAbstractItemView { background-color: #FFFAFC; color: #704653; selection-background-color: #F2A9C0; selection-color: #704653; outline: 0; }\n"
+"QComboBox QAbstractItemView::item { color: #704653; min-height: 28px; padding: 5px; }\n"
+"   ")
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.algorithmLayout = QHBoxLayout()

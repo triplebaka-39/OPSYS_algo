@@ -5,6 +5,8 @@ from PySide6.QtWidgets import (
     QGraphicsScene,
     QHeaderView,
     QMessageBox,
+    QPushButton,
+    QSizePolicy,
     QTableWidgetItem,
 )
 
@@ -41,6 +43,12 @@ class CpuSchedulingWindow(QDialog):
         super().__init__(parent)
         self.ui = Ui_Dialog()
         self.ui.setupUi(self)
+        self.btnBackToDashboard = QPushButton("Back to Dashboard", self)
+        self.btnBackToDashboard.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
+        self.ui.verticalLayout.addStretch(1)
+        self.ui.verticalLayout.addWidget(self.btnBackToDashboard)
         self.setWindowTitle("CPU Scheduling")
         self.resize(1000, 850)
         self.center_window()
@@ -57,6 +65,7 @@ class CpuSchedulingWindow(QDialog):
         self.ui.btnStepByStep.clicked.connect(self.show_step_by_step)
         self.ui.btnReset.clicked.connect(self.reset)
         self.ui.btnClearAll.clicked.connect(self.clear_all)
+        self.btnBackToDashboard.clicked.connect(self.close)
 
         self.add_process("P1", "0", "10", "2")
         self.add_process("P2", "0", "5", "1")
@@ -169,8 +178,9 @@ class CpuSchedulingWindow(QDialog):
         total_time = max(total_time, 1)
         scale = width / total_time
         block_height = 40
-        font = QFont("Segoe UI", 9)
-        time_font = QFont("Segoe UI", 8)
+        font = QFont("Nunito", 9)
+        font.setWeight(QFont.Weight.Bold)
+        time_font = QFont("Nunito", 9)
         time_pen = QPen(QColor("#704653"))
         colors = {pid: QColor(PROCESS_COLORS[index % len(PROCESS_COLORS)])
                   for index, pid in enumerate(dict.fromkeys(

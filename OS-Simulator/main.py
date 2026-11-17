@@ -1,12 +1,12 @@
 
 import sys
 
-from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
     QLabel,
     QPushButton,
+    QSizePolicy,
     QVBoxLayout,
     QMainWindow,
 )
@@ -14,6 +14,9 @@ from PySide6.QtWidgets import (
 from module.cpu_scheduling import CpuSchedulingWindow
 from module.bankers import BankersWindow
 from module.page_replacement import PageReplacementWindow
+from module.paging import PagingWindow
+from module.fragmentation import FragmentationWindow
+from module.typography import load_application_fonts
 from ui_main_window import Ui_MainWindow
 
 
@@ -39,7 +42,8 @@ class ModuleWindow(QDialog):
 
         title = QLabel(module_name)
         title.setStyleSheet(
-            "font-size: 24px; font-weight: bold;"
+            'font-family: "Nunito"; font-size: 22pt; '
+            "font-weight: 700; color: #C45B7A;"
         )
         layout.addWidget(title)
 
@@ -49,11 +53,21 @@ class ModuleWindow(QDialog):
         )
 
         description.setWordWrap(True)
+        description.setStyleSheet(
+            'font-family: "Nunito"; font-size: 11pt; color: #704653;'
+        )
         layout.addWidget(description)
 
         close_button = QPushButton("Back to Dashboard")
+        close_button.setStyleSheet(
+            'font-family: "Nunito"; font-size: 11pt; font-weight: 600;'
+        )
+        close_button.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
         close_button.clicked.connect(self.close)
 
+        layout.addStretch(1)
         layout.addWidget(close_button)
 
     def center_window(self):
@@ -97,9 +111,7 @@ class MainWindow(QMainWindow):
             lambda: self.open_module("Banker's Algorithm")
         )
 
-        self.ui.btnPaging.clicked.connect(
-            lambda: self.open_module("Paging")
-        )
+        self.ui.btnPaging.clicked.connect(self.open_paging)
 
         self.ui.btnPageReplacement.clicked.connect(
             self.open_page_replacement
@@ -132,6 +144,8 @@ class MainWindow(QMainWindow):
 
         if module_name == "Banker's Algorithm":
             window = BankersWindow(self)
+        elif module_name == "Fragmentation":
+            window = FragmentationWindow(self)
         else:
             window = ModuleWindow(module_name)
 
@@ -173,6 +187,19 @@ class MainWindow(QMainWindow):
 
         window.show()
 
+    def open_paging(self):
+
+        window = PagingWindow(self)
+
+        self.module_windows.append(window)
+
+        window.finished.connect(
+            lambda: self.module_windows.remove(window)
+            if window in self.module_windows else None
+        )
+
+        window.show()
+
 
 # ==========================================
 # APPLICATION ENTRY POINT
@@ -181,7 +208,7 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)
-    app.setFont(QFont("Inter"))
+    load_application_fonts(app)
 
     window = MainWindow()
     window.show()
