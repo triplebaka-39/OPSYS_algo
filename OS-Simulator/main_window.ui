@@ -22,8 +22,12 @@ QMainWindow,
 QDialog {
     background-color: #FFF0F3;
     color: #704653;
-    font-family: &quot;Segoe UI&quot;;
+    font-family: &quot;Inter&quot;;
     font-size: 10pt;
+}
+
+QWidget {
+    font-family: &quot;Inter&quot;;
 }
 
 /* ===== MAIN CONTENT ===== */
