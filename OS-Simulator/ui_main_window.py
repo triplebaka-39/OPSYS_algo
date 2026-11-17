@@ -33,12 +33,12 @@ class Ui_MainWindow(object):
 "QDialog {\n"
 "    background-color: #FFF0F3;\n"
 "    color: #704653;\n"
-"    font-family: \"Inter\";\n"
+"    font-family: \"Nunito\";\n"
 "    font-size: 10pt;\n"
 "}\n"
 "\n"
 "QWidget {\n"
-"    font-family: \"Inter\";\n"
+"    font-family: \"Nunito\";\n"
 "}\n"
 "\n"
 "/* ===== MAIN CONTENT ===== */\n"
@@ -57,13 +57,14 @@ class Ui_MainWindow(object):
 "\n"
 "QLabel#lblTitle {\n"
 "    color: #C45B7A;\n"
-"    font-size: 25pt;\n"
-"    font-weight: bold;\n"
+"    font-size: 24pt;\n"
+"    font-weight: 700;\n"
 "}\n"
 "\n"
 "QLabel#lblSubtitle {\n"
 "    color: #A77987;\n"
 "    font-size: 11pt;\n"
+"    font-weight: 400;\n"
 "}\n"
 "\n"
 "/* ===== MODULE BUTTONS ===== */\n"
@@ -76,13 +77,13 @@ class Ui_MainWindow(object):
 "    padding: 14px;\n"
 "    min-height: 48px;\n"
 "    font-size: 11pt;\n"
-"    font-weight: bold;\n"
+"    font-weight: 600;\n"
 "}\n"
-"\n"
+""
+                        "\n"
 "QPushButton:hover {\n"
 "    background-color: #FFC4D6;\n"
-"    border: 2"
-                        "px solid #E994B1;\n"
+"    border: 2px solid #E994B1;\n"
 "    color: #78364D;\n"
 "}\n"
 "\n"
@@ -125,7 +126,8 @@ class Ui_MainWindow(object):
 "    color: #784254;\n"
 "    padding: 8px;\n"
 "    border: none;\n"
-"    font-weight: bold;\n"
+"    fon"
+                        "t-weight: 700;\n"
 "}\n"
 "")
         self.verticalLayoutWidget = QWidget(self.centralwidget)
@@ -201,15 +203,15 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.lblTitle.setText(QCoreApplication.translate("MainWindow", u"OS Simulator ヾ(≧▽≦*)o", None))
+        self.lblTitle.setText(QCoreApplication.translate("MainWindow", u"OS Simulator \u30fe(\u2267\u25bd\u2266*)o", None))
         self.lblSubtitle.setText(QCoreApplication.translate("MainWindow", u"made with love by: ange, neetocat & CHR !!", None))
-        self.btnPaging.setText(QCoreApplication.translate("MainWindow", u"♡ Paging", None))
-        self.btnPageReplacement.setText(QCoreApplication.translate("MainWindow", u"♡ Page Replacement", None))
-        self.btnBankers.setText(QCoreApplication.translate("MainWindow", u"♡ Banker's Algorithm", None))
-        self.btnSegmentation.setText(QCoreApplication.translate("MainWindow", u"♡ Segmentation", None))
-        self.btnCpuScheduling.setText(QCoreApplication.translate("MainWindow", u"♡ CPU Scheduling", None))
-        self.btnFragmentation.setText(QCoreApplication.translate("MainWindow", u"♡ Fragmentation", None))
-        self.btnDiskScheduling.setText(QCoreApplication.translate("MainWindow", u"♡ Disk Scheduling", None))
-        self.btnMultiprogramming.setText(QCoreApplication.translate("MainWindow", u"♡ Multiprogramming", None))
+        self.btnPaging.setText(QCoreApplication.translate("MainWindow", u"\u2661 Paging", None))
+        self.btnPageReplacement.setText(QCoreApplication.translate("MainWindow", u"\u2661 Page Replacement", None))
+        self.btnBankers.setText(QCoreApplication.translate("MainWindow", u"\u2661 Banker's Algorithm", None))
+        self.btnSegmentation.setText(QCoreApplication.translate("MainWindow", u"\u2661 Segmentation", None))
+        self.btnCpuScheduling.setText(QCoreApplication.translate("MainWindow", u"\u2661 CPU Scheduling", None))
+        self.btnFragmentation.setText(QCoreApplication.translate("MainWindow", u"\u2661 Fragmentation", None))
+        self.btnDiskScheduling.setText(QCoreApplication.translate("MainWindow", u"\u2661 Disk Scheduling", None))
+        self.btnMultiprogramming.setText(QCoreApplication.translate("MainWindow", u"\u2661 Multiprogramming", None))
     # retranslateUi
 

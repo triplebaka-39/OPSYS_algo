@@ -3,7 +3,7 @@
 import random
 
 from PySide6.QtCore import QEasingCurve, QEvent, Qt, QVariantAnimation, Signal
-from PySide6.QtGui import QColor, QIntValidator
+from PySide6.QtGui import QColor, QIntValidator, QPalette
 from PySide6.QtWidgets import (
     QDialog,
     QFrame,
@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QSizePolicy,
     QSpinBox,
     QTableWidget,
     QTableWidgetItem,
@@ -25,12 +26,12 @@ class AnimatedButton(QPushButton):
 
     def __init__(self, text):
         super().__init__(text)
-        self._base_background = QColor("#FFFFFF")
-        self._base_foreground = QColor("#0F1B3D")
-        self._base_border = QColor("#0F1B3D")
-        self._hover_background = QColor(0, 0, 0, 0)
-        self._hover_foreground = QColor("#0F1B3D")
-        self._hover_border = QColor("#0F1B3D")
+        self._base_background = QColor("#FFFAFC")
+        self._base_foreground = QColor("#704653")
+        self._base_border = QColor("#EABAC9")
+        self._hover_background = QColor("#FFDCE6")
+        self._hover_foreground = QColor("#704653")
+        self._hover_border = QColor("#C45B7A")
         self._hover_progress = 0.0
         self._animation = QVariantAnimation(self)
         self._animation.setDuration(180)
@@ -120,6 +121,27 @@ class AnimatedButton(QPushButton):
 
 
 class ResourceSpinBox(QSpinBox):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        palette = self.palette()
+        palette.setColor(QPalette.ColorRole.Base, QColor("#FFFAFC"))
+        palette.setColor(QPalette.ColorRole.Text, QColor("#704653"))
+        palette.setColor(QPalette.ColorRole.Highlight, QColor("#F2A9C0"))
+        palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#704653"))
+        self.setPalette(palette)
+        self.lineEdit().setPalette(palette)
+        self.lineEdit().setStyleSheet(
+            "QLineEdit {"
+            " background-color: #FFFAFC; color: #704653;"
+            " border: 1px solid #EABAC9; border-radius: 6px;"
+            ' padding: 2px 4px; font-family: "Nunito";'
+            " font-size: 12pt; font-weight: 600;"
+            " selection-background-color: #F2A9C0;"
+            " selection-color: #704653;"
+            "}"
+            "QLineEdit:focus { border: 2px solid #C45B7A; }"
+        )
+
     def focusInEvent(self, event):
         super().focusInEvent(event)
         self.lineEdit().deselect()
@@ -178,14 +200,16 @@ class ResourceField(QLineEdit):
 
     def set_highlighted(self, highlighted):
         """Pink outline marks the most recently changed value; otherwise plain."""
-        border = "#FF3D8B" if highlighted else "#E3E6EF"
+        border = "#C45B7A" if highlighted else "#EABAC9"
         self.setStyleSheet(
             "QLineEdit {"
-            " background: #FFFFFF; color: #0F1B3D;"
+            " background: #FFFAFC; color: #704653;"
             " border: 2px solid %s; border-radius: 7px;"
-            " padding: 0 2px; font-size: 11pt; font-weight: 400;"
-            " selection-background-color: #DCE3F5; selection-color: #0F1B3D;"
-            "}" % border
+            ' padding: 0 2px; font-family: "Nunito";'
+            " font-size: 12pt; font-weight: 600;"
+            " selection-background-color: #F2A9C0; selection-color: #704653;"
+            "}"
+            "QLineEdit:focus { border: 2px solid #C45B7A; }" % border
         )
 
     def keyPressEvent(self, event):
@@ -279,117 +303,128 @@ class BankersWindow(QDialog):
         self.setStyleSheet(
             """
             QDialog {
-                background: #0F1B3D;
-                color: #FFFFFF;
-                font-family: "Inter";
+                background: #FFF0F3;
+                color: #704653;
+                font-family: "Nunito";
                 font-size: 10pt;
             }
-            QWidget { font-family: "Inter"; }
-            QWidget#content { background: #0F1B3D; }
-            QLabel { color: #FFFFFF; }
+            QWidget { font-family: "Nunito"; }
+            QWidget#content { background: #FFF0F3; }
+            QLabel { color: #704653; font-size: 10pt; }
             QLabel#eyebrow {
-                color: #FFFFFF;
+                color: #C45B7A;
                 font-size: 11pt;
                 font-weight: 700;
             }
             QLabel#title {
-                color: #FFFFFF;
-                font-size: 22pt;
+                color: #C45B7A;
+                font-size: 24pt;
                 font-weight: 700;
             }
             QLabel#muted {
-                color: #FFFFFF;
-                font-size: 9pt;
+                color: #704653;
+                font-size: 10pt;
             }
-            QLabel#ruleText { color: #FFFFFF; font-weight: 600; }
+            QLabel#ruleText {
+                color: #704653;
+                font-size: 10pt;
+                font-weight: 700;
+            }
             QLabel#detail {
-                background: #FFFFFF;
-                color: #0F1B3D;
-                border-left: 4px solid #FF3D8B;
+                background: #FFDCE6;
+                color: #704653;
+                border-left: 4px solid #C45B7A;
                 padding: 7px;
-                font-size: 9pt;
+                font-size: 10pt;
             }
             QFrame#panel {
-                background: #FFFFFF;
-                border: 1px solid #FFFFFF;
+                background: #FFFAFC;
+                border: 1px solid #EABAC9;
                 border-radius: 12px;
             }
             QFrame#panel QLabel,
-            QFrame#accentPanel QLabel { color: #0F1B3D; }
+            QFrame#accentPanel QLabel { color: #704653; }
             QFrame#availablePanel {
                 background: transparent;
                 border: none;
             }
-            QFrame#availablePanel QLabel { color: #FFFFFF; }
+            QFrame#availablePanel QLabel { color: #C45B7A; }
             QFrame#accentPanel {
-                background: #FFFFFF;
-                border: 1px solid #FF3D8B;
+                background: #FFFAFC;
+                border: 1px solid #C45B7A;
                 border-radius: 12px;
             }
             QTableWidget {
-                background: #FFFFFF;
-                alternate-background-color: #FFFFFF;
-                color: #0F1B3D;
-                gridline-color: #FFFFFF;
-                border: 1px solid #0F1B3D;
+                background: #FFFAFC;
+                alternate-background-color: #FFF0F3;
+                color: #704653;
+                gridline-color: #EABAC9;
+                border: 1px solid #EABAC9;
                 border-radius: 8px;
-                selection-background-color: #FF3D8B;
-                font-size: 11pt;
+                selection-background-color: #F2A9C0;
+                selection-color: #704653;
+                font-size: 10pt;
             }
             QHeaderView::section {
-                background: #0F1B3D;
-                color: #FFFFFF;
+                background: #FFDCE6;
+                color: #704653;
                 padding: 6px 4px;
                 border: 0;
-                border-right: 1px solid #FFFFFF;
-                border-bottom: 2px solid #0F1B3D;
+                border-right: 1px solid #EABAC9;
+                border-bottom: 2px solid #EABAC9;
                 font-weight: 700;
                 font-size: 10pt;
             }
             QSpinBox QLineEdit {
-                background: #FFFFFF;
-                color: #0F1B3D;
-                border: 1px solid #0F1B3D;
+                background: #FFFAFC;
+                color: #704653;
+                border: 1px solid #EABAC9;
                 border-radius: 7px;
                 padding: 0 2px;
                 min-height: 28px;
-                font-size: 11pt;
+                font-size: 10pt;
                 font-weight: 600;
-                selection-background-color: #FFFFFF;
-                selection-color: #0F1B3D;
+                selection-background-color: #F2A9C0;
+                selection-color: #704653;
             }
-            QSpinBox QLineEdit:focus { border: 1px solid #0F1B3D; }
+            QSpinBox QLineEdit:focus { border: 1px solid #C45B7A; }
             QPushButton {
-                background: #FFFFFF;
-                color: #0F1B3D;
-                border: 1px solid #FFFFFF;
+                background: #FFDCE6;
+                color: #704653;
+                border: 1px solid #EABAC9;
                 border-radius: 10px;
                 min-height: 38px;
                 padding: 7px 16px;
                 font-size: 10pt;
-                font-weight: 700;
+                font-weight: 600;
             }
-            QPushButton:focus { border: 2px solid #FF3D8B; }
+            QPushButton:hover { background: #F2A9C0; }
+            QPushButton:focus { border: 2px solid #C45B7A; }
             QPushButton:disabled {
-                background: #FFFFFF;
-                color: #0F1B3D;
-                border-color: #0F1B3D;
+                background: #FFF0F3;
+                color: #704653;
+                border-color: #EABAC9;
             }
             QPushButton#primary {
-                background: #FF3D8B;
-                color: #FFFFFF;
-                border-color: #FF3D8B;
+                background: #C45B7A;
+                color: #FFFAFC;
+                border-color: #C45B7A;
+            }
+            QPushButton#primary:hover {
+                background: #F2A9C0;
+                color: #704653;
+                border-color: #C45B7A;
             }
             QPushButton#primary:disabled {
-                background: #FFFFFF;
-                color: #0F1B3D;
-                border-color: #0F1B3D;
+                background: #FFF0F3;
+                color: #704653;
+                border-color: #EABAC9;
             }
             QPushButton#resourceStep {
                 border-radius: 8px;
                 padding: 0;
                 min-height: 28px;
-                font-size: 11pt;
+                font-size: 10pt;
             }
             """
         )
@@ -486,8 +521,8 @@ class BankersWindow(QDialog):
         button.setToolTip("%s available units of Resource %s" % (action, resource))
         button.setFixedSize(28, 32)
         button.set_color_scheme(
-            "#FFFFFF", "#0F1B3D", "#FFFFFF",
-            "transparent", "#FFFFFF", "#FFFFFF",
+            "#FFDCE6", "#704653", "#EABAC9",
+            "#F2A9C0", "#704653", "#C45B7A",
         )
         return button
 
@@ -522,8 +557,9 @@ class BankersWindow(QDialog):
             label.setObjectName("eyebrow")
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             label.setStyleSheet(
-                "font-size: 10pt; font-weight: 700;"
-                + (" color: #FF3D8B;" if label is need_header else "")
+                'font-family: "Nunito"; font-size: 10pt;'
+                " font-weight: 700;"
+                + (" color: #C45B7A;" if label is need_header else "")
             )
         layout.addLayout(group_headers)
 
@@ -616,9 +652,10 @@ class BankersWindow(QDialog):
             tile.setAlignment(Qt.AlignmentFlag.AlignCenter)
             tile.setMinimumSize(82, 54)
             tile.setStyleSheet(
-                "background: #FFFFFF; border: 1px solid #0F1B3D; "
-                "border-radius: 8px; color: #0F1B3D; "
-                "font-size: 9pt; font-weight: 700;"
+                "background: #FFFAFC; border: 1px solid #EABAC9; "
+                "border-radius: 8px; color: #704653; "
+                'font-family: "Nunito"; font-size: 10pt;'
+                " font-weight: 700;"
             )
             self.process_tiles.append(tile)
             tiles.addWidget(tile)
@@ -641,8 +678,8 @@ class BankersWindow(QDialog):
         work_layout.addWidget(work_title)
         self.work_label = QLabel("A  3      B  3      C  2")
         self.work_label.setStyleSheet(
-            "font-family: Inter; font-size: 13pt; "
-            "font-weight: 700; color: #0F1B3D;"
+            'font-family: "Nunito"; font-size: 12pt; '
+            "font-weight: 600; color: #704653;"
         )
         work_layout.addWidget(self.work_label)
         row.addWidget(work_panel, 1)
@@ -652,8 +689,8 @@ class BankersWindow(QDialog):
         row = QHBoxLayout()
         self.step_button = AnimatedButton("Check next step")
         self.step_button.set_color_scheme(
-            "#FFFFFF", "#0F1B3D", "#FFFFFF",
-            "transparent", "#FFFFFF", "#FFFFFF",
+            "#FFDCE6", "#704653", "#EABAC9",
+            "#F2A9C0", "#704653", "#C45B7A",
         )
         self.step_button.setFixedHeight(42)
         self.step_button.setAccessibleName("Check next safety step")
@@ -663,8 +700,8 @@ class BankersWindow(QDialog):
         self.run_button = AnimatedButton("Run check")
         self.run_button.setObjectName("primary")
         self.run_button.set_color_scheme(
-            "#FF3D8B", "#FFFFFF", "#FF3D8B",
-            "transparent", "#FF3D8B", "#FF3D8B",
+            "#C45B7A", "#FFFAFC", "#C45B7A",
+            "#F2A9C0", "#704653", "#C45B7A",
         )
         self.run_button.setFixedHeight(42)
         self.run_button.setAccessibleName("Run full safety check")
@@ -672,8 +709,8 @@ class BankersWindow(QDialog):
         self.run_button.clicked.connect(self._run_all)
         self.reset_button = AnimatedButton("Reset")
         self.reset_button.set_color_scheme(
-            "#FFFFFF", "#0F1B3D", "#FFFFFF",
-            "transparent", "#FFFFFF", "#FFFFFF",
+            "#FFDCE6", "#704653", "#EABAC9",
+            "#F2A9C0", "#704653", "#C45B7A",
         )
         self.reset_button.setFixedHeight(42)
         self.reset_button.setAccessibleName("Load sample values")
@@ -684,8 +721,8 @@ class BankersWindow(QDialog):
         row.addWidget(self.reset_button)
         self.random_button = AnimatedButton("Random example")
         self.random_button.set_color_scheme(
-            "#FFFFFF", "#0F1B3D", "#FFFFFF",
-            "transparent", "#FFFFFF", "#FFFFFF",
+            "#FFDCE6", "#704653", "#EABAC9",
+            "#F2A9C0", "#704653", "#C45B7A",
         )
         self.random_button.setFixedHeight(42)
         self.random_button.setAccessibleName("Load random example")
@@ -698,13 +735,17 @@ class BankersWindow(QDialog):
         parent_layout.addLayout(row)
         self.dashboard_button = AnimatedButton("Back to Dashboard")
         self.dashboard_button.set_color_scheme(
-            "transparent", "#FFFFFF", "#FFFFFF",
-            "transparent", "#FF3D8B", "#FF3D8B",
+            "#FFDCE6", "#704653", "#EABAC9",
+            "#F2A9C0", "#704653", "#C45B7A",
         )
         self.dashboard_button.setFixedHeight(42)
+        self.dashboard_button.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
         self.dashboard_button.setAccessibleName("Back to Dashboard")
         self.dashboard_button.setToolTip("Close this simulator and return to the dashboard.")
         self.dashboard_button.clicked.connect(self.close)
+        parent_layout.addStretch(1)
         parent_layout.addWidget(self.dashboard_button)
 
     @staticmethod
@@ -790,11 +831,11 @@ class BankersWindow(QDialog):
                 item = self.table.item(process, 7 + resource)
                 if held > claim:
                     new_text = "!"
-                    item.setForeground(QColor("#FF3D8B"))
+                    item.setForeground(QColor("#C45B7A"))
                     valid = False
                 else:
                     new_text = str(claim - held)
-                    item.setForeground(QColor("#0F1B3D"))
+                    item.setForeground(QColor("#704653"))
                 if item.text() != new_text:
                     item.setText(new_text)
         self._update_visuals()
@@ -896,13 +937,14 @@ class BankersWindow(QDialog):
         for process, tile in enumerate(self.process_tiles):
             if process in self.completed_processes:
                 order = self.sequence.index(process) + 1
-                color, text_color, state = "#FF3D8B", "#FFFFFF", "DONE · %d" % order
+                color, text_color, state = "#C45B7A", "#FFFAFC", "DONE · %d" % order
             else:
-                color, text_color, state = "#FFFFFF", "#0F1B3D", "WAITING"
+                color, text_color, state = "#FFFAFC", "#704653", "WAITING"
             tile.setText("P%d\n%s" % (process, state))
             tile.setStyleSheet(
-                "background: %s; border: 1px solid #0F1B3D; "
-                "color: %s; font-size: 8pt; font-weight: 700;"
+                "background: %s; border: 1px solid #EABAC9; "
+                'color: %s; font-family: "Nunito";'
+                " font-size: 10pt; font-weight: 700;"
                 % (color, text_color)
             )
         order = " > ".join("P%d" % process for process in self.sequence)
@@ -916,17 +958,18 @@ class BankersWindow(QDialog):
 
     def _set_state(self, text, kind):
         palette = {
-            "ready": ("#FFFFFF", "#0F1B3D", "#0F1B3D"),
-            "progress": ("#0F1B3D", "#FFFFFF", "#0F1B3D"),
-            "safe": ("#FF3D8B", "#FFFFFF", "#FF3D8B"),
-            "unsafe": ("#FF3D8B", "#FFFFFF", "#FF3D8B"),
-            "invalid": ("#FF3D8B", "#FFFFFF", "#FF3D8B"),
+            "ready": ("#FFFAFC", "#704653", "#EABAC9"),
+            "progress": ("#FFDCE6", "#704653", "#EABAC9"),
+            "safe": ("#C45B7A", "#FFFAFC", "#C45B7A"),
+            "unsafe": ("#C45B7A", "#FFFAFC", "#C45B7A"),
+            "invalid": ("#C45B7A", "#FFFAFC", "#C45B7A"),
         }
         background, foreground, border = palette[kind]
         self.state_label.setText(text)
         self.state_label.setStyleSheet(
             "background: %s; color: %s; border: 1px solid %s; "
-            "padding: 4px 8px; font-size: 9pt; font-weight: 700;"
+            'padding: 4px 8px; font-family: "Nunito";'
+            " font-size: 10pt; font-weight: 700;"
             % (background, foreground, border)
         )
 

@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QComboBox,
     QLineEdit,
+    QSizePolicy,
     QSpinBox,
     QTableWidget,
     QTableWidgetItem,
@@ -29,6 +30,7 @@ from algorithms.page_replacement import (
     lru,
     optimal
 )
+from module.typography import load_application_fonts
 
 
 class PageReplacementWindow(QDialog):
@@ -52,6 +54,7 @@ class PageReplacementWindow(QDialog):
         self.btnStartStepByStep.clicked.connect(self.start_step_by_step)
         self.btnNextStep.clicked.connect(self.next_step)
         self.btnClear.clicked.connect(self.clear_simulation)
+        self.btnBackToDashboard.clicked.connect(self.close)
 
     # -----------------------------------
     # CENTER WINDOW
@@ -161,6 +164,11 @@ class PageReplacementWindow(QDialog):
         self.btnClear = QPushButton("Clear")
         self.btnClear.setObjectName("secondaryButton")
 
+        self.btnBackToDashboard = QPushButton("Back to Dashboard")
+        self.btnBackToDashboard.setObjectName("secondaryButton")
+        self.btnBackToDashboard.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
         button_layout.addWidget(self.btnSimulate)
         button_layout.addWidget(self.btnStartStepByStep)
         button_layout.addWidget(self.btnNextStep)
@@ -229,6 +237,9 @@ class PageReplacementWindow(QDialog):
 
         main_layout.addLayout(stats_layout)
 
+        main_layout.addStretch(1)
+        main_layout.addWidget(self.btnBackToDashboard)
+
         # Example input
         self.txtReferenceString.setText(
             "7, 0, 1, 2, 0, 3, 0, 4, 2, 3"
@@ -244,18 +255,24 @@ class PageReplacementWindow(QDialog):
             QDialog {
                 background-color: #FFF0F3;
                 color: #704653;
-                font-family: "Segoe UI";
+                font-family: "Nunito";
+                font-size: 10pt;
+            }
+
+            QWidget {
+                font-family: "Nunito";
             }
 
             QLabel {
                 color: #704653;
                 background: transparent;
+                font-size: 10pt;
             }
 
             QLabel#title {
                 color: #C45B7A;
-                font-size: 25pt;
-                font-weight: bold;
+                font-size: 24pt;
+                font-weight: 700;
             }
 
             QLabel#subtitle {
@@ -270,7 +287,7 @@ class PageReplacementWindow(QDialog):
                 border-radius: 10px;
                 margin-top: 12px;
                 padding: 15px;
-                font-weight: bold;
+                font-weight: 700;
                 font-size: 11pt;
             }
 
@@ -287,6 +304,7 @@ class PageReplacementWindow(QDialog):
                 border-radius: 8px;
                 padding: 9px;
                 min-height: 22px;
+                font-size: 10pt;
             }
 
             QComboBox QAbstractItemView {
@@ -314,7 +332,8 @@ class PageReplacementWindow(QDialog):
                 border: 1px solid #F3B5C8;
                 border-radius: 9px;
                 padding: 11px;
-                font-weight: bold;
+                font-size: 10pt;
+                font-weight: 600;
                 min-height: 25px;
             }
 
@@ -352,13 +371,14 @@ class PageReplacementWindow(QDialog):
                 color: #784254;
                 padding: 10px;
                 border: none;
-                font-weight: bold;
+                font-size: 10pt;
+                font-weight: 700;
             }
 
             QLabel#statLabel {
                 color: #C45B7A;
                 font-size: 10pt;
-                font-weight: bold;
+                font-weight: 700;
             }
         """)
 
@@ -585,6 +605,7 @@ class PageReplacementWindow(QDialog):
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)
+    load_application_fonts(app)
 
     window = PageReplacementWindow()
     window.show()

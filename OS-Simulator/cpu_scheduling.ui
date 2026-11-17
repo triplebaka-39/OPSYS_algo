@@ -4,7 +4,23 @@
  <widget class="QDialog" name="Dialog">
   <property name="geometry"><rect><x>0</x><y>0</y><width>900</width><height>820</height></rect></property>
   <property name="windowTitle"><string>CPU Scheduling</string></property>
-  <property name="styleSheet"><string notr="true">QDialog { background-color: #FFF0F3; color: #704653; font-family: &quot;Segoe UI&quot;; } QLabel { color: #704653; background: transparent; } QLabel#lblTitle { color: #C45B7A; font-size: 23pt; font-weight: bold; } QLabel#lblInput, QLabel#lblResults, QLabel#lblGantt { color: #C45B7A; font-size: 13pt; font-weight: bold; } QPushButton { background-color: #FFDCE6; color: #87475D; border: 1px solid #F3B5C8; border-radius: 9px; padding: 8px; font-weight: bold; } QPushButton:hover { background-color: #FFC4D6; } QPushButton:pressed { background-color: #F2A9C0; } QTableWidget { background-color: #FFFAFC; alternate-background-color: #FFF0F4; color: #704653; gridline-color: #F0C6D3; border: 1px solid #EABAC9; border-radius: 8px; } QHeaderView::section { background-color: #F8D4E0; color: #784254; padding: 7px; border: none; font-weight: bold; } QComboBox, QSpinBox { background-color: #FFFAFC; color: #704653; border: 1px solid #EABAC9; border-radius: 8px; padding: 6px; } QComboBox QAbstractItemView { background-color: #FFFAFC; color: #704653; selection-background-color: #F2A9C0; selection-color: #704653; outline: 0; } QComboBox QAbstractItemView::item { color: #704653; min-height: 28px; padding: 5px; }</string></property>
+  <property name="styleSheet">
+   <string notr="true">
+QDialog { background-color: #FFF0F3; color: #704653; font-family: &quot;Nunito&quot;; font-size: 10pt; }
+QWidget { font-family: &quot;Nunito&quot;; }
+QLabel { color: #704653; background: transparent; font-size: 10pt; }
+QLabel#lblTitle { color: #C45B7A; font-size: 24pt; font-weight: 700; }
+QLabel#lblInput, QLabel#lblResults, QLabel#lblGantt { color: #C45B7A; font-size: 13pt; font-weight: 700; }
+QPushButton { background-color: #FFDCE6; color: #87475D; border: 1px solid #F3B5C8; border-radius: 9px; padding: 8px; font-size: 10pt; font-weight: 600; }
+QPushButton:hover { background-color: #FFC4D6; }
+QPushButton:pressed { background-color: #F2A9C0; }
+QTableWidget { background-color: #FFFAFC; alternate-background-color: #FFF0F4; color: #704653; gridline-color: #F0C6D3; border: 1px solid #EABAC9; border-radius: 8px; font-size: 10pt; }
+QHeaderView::section { background-color: #F8D4E0; color: #784254; padding: 7px; border: none; font-size: 10pt; font-weight: 700; }
+QComboBox, QSpinBox { background-color: #FFFAFC; color: #704653; border: 1px solid #EABAC9; border-radius: 8px; padding: 6px; font-size: 10pt; }
+QComboBox QAbstractItemView { background-color: #FFFAFC; color: #704653; selection-background-color: #F2A9C0; selection-color: #704653; outline: 0; }
+QComboBox QAbstractItemView::item { color: #704653; min-height: 28px; padding: 5px; }
+   </string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item><layout class="QHBoxLayout" name="algorithmLayout">
     <item><widget class="QLabel" name="lblTitle"><property name="text"><string>CPU Scheduling</string></property></widget></item>

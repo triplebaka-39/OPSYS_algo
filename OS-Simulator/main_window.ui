@@ -22,12 +22,12 @@ QMainWindow,
 QDialog {
     background-color: #FFF0F3;
     color: #704653;
-    font-family: &quot;Inter&quot;;
+    font-family: &quot;Nunito&quot;;
     font-size: 10pt;
 }
 
 QWidget {
-    font-family: &quot;Inter&quot;;
+    font-family: &quot;Nunito&quot;;
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -46,13 +46,14 @@ QLabel {
 
 QLabel#lblTitle {
     color: #C45B7A;
-    font-size: 25pt;
-    font-weight: bold;
+    font-size: 24pt;
+    font-weight: 700;
 }
 
 QLabel#lblSubtitle {
     color: #A77987;
     font-size: 11pt;
+    font-weight: 400;
 }
 
 /* ===== MODULE BUTTONS ===== */
@@ -65,7 +66,7 @@ QPushButton {
     padding: 14px;
     min-height: 48px;
     font-size: 11pt;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 QPushButton:hover {
@@ -113,7 +114,7 @@ QHeaderView::section {
     color: #784254;
     padding: 8px;
     border: none;
-    font-weight: bold;
+    font-weight: 700;
 }
 </string>
    </property>
@@ -130,14 +131,14 @@ QHeaderView::section {
      <item>
       <widget class="QLabel" name="lblTitle">
        <property name="text">
-        <string>OS Simulator</string>
+        <string>OS Simulator ヾ(≧▽≦*)o</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="lblSubtitle">
        <property name="text">
-        <string>Operating Systems Learning Lab</string>
+        <string>made with love by: ange, neetocat &amp; CHR !!</string>
        </property>
       </widget>
      </item>
@@ -146,56 +147,56 @@ QHeaderView::section {
        <item row="1" column="0">
         <widget class="QPushButton" name="btnPaging">
          <property name="text">
-          <string>Paging</string>
+          <string>♡ Paging</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
         <widget class="QPushButton" name="btnPageReplacement">
          <property name="text">
-          <string>Page Replacement</string>
+          <string>♡ Page Replacement</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
         <widget class="QPushButton" name="btnBankers">
          <property name="text">
-          <string>Banker's Algorithm</string>
+          <string>♡ Banker's Algorithm</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
         <widget class="QPushButton" name="btnSegmentation">
          <property name="text">
-          <string>Segmentation</string>
+          <string>♡ Segmentation</string>
          </property>
         </widget>
        </item>
        <item row="0" column="0">
         <widget class="QPushButton" name="btnCpuScheduling">
          <property name="text">
-          <string>CPU Scheduling</string>
+          <string>♡ CPU Scheduling</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
         <widget class="QPushButton" name="btnFragmentation">
          <property name="text">
-          <string>Fragmentation</string>
+          <string>♡ Fragmentation</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
         <widget class="QPushButton" name="btnDiskScheduling">
          <property name="text">
-          <string>Disk Scheduling</string>
+          <string>♡ Disk Scheduling</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
         <widget class="QPushButton" name="btnMultiprogramming">
          <property name="text">
-          <string>Multiprogramming</string>
+          <string>♡ Multiprogramming</string>
          </property>
         </widget>
        </item>
