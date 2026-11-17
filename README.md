@@ -1,10 +1,42 @@
 # OPSYS_algo
 
-#### you will need to first clone this repository and type ````cd OS-Simulator````
-#### after that create a vitual environment by typing ````python -m venv .venv````
-#### once you have created the venv file, you need to activate it by ````.\.venv\Scripts\Activate.ps1````
-#### i made a dependencies text file, just run it ````python -m pip install -r requirements.txt````
-#### you can run the program with ````python main.py````
-#### but first we should work on the GUI, so launch ````pyside6-designer```` first by typing that
+## Windows setup
 
-#### keep practicing for now, im gonna do more reading in the docs
+From the repository root, enter the simulator directory:
+
+```powershell
+cd OS-Simulator
+```
+
+Create and activate the virtual environment:
+
+```powershell
+python -m venv .venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+.\.venv\Scripts\Activate.ps1
+```
+
+Install the dependencies:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Run the simulator:
+
+```powershell
+python .\main.py
+```
+
+Open the Qt Designer form:
+
+```powershell
+.\.venv\Scripts\pyside6-designer.exe .\main_window.ui
+```
+
+If the environment is not activated, use the venv executables directly:
+
+```powershell
+.\.venv\Scripts\python.exe .\main.py
+.\.venv\Scripts\pyside6-designer.exe .\main_window.ui
+```

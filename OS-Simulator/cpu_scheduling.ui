@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry"><rect><x>0</x><y>0</y><width>900</width><height>820</height></rect></property>
+  <property name="windowTitle"><string>CPU Scheduling</string></property>
+  <property name="styleSheet"><string notr="true">QDialog { background-color: #FFF0F3; color: #704653; font-family: &quot;Segoe UI&quot;; } QLabel { color: #704653; background: transparent; } QLabel#lblTitle { color: #C45B7A; font-size: 23pt; font-weight: bold; } QLabel#lblInput, QLabel#lblResults, QLabel#lblGantt { color: #C45B7A; font-size: 13pt; font-weight: bold; } QPushButton { background-color: #FFDCE6; color: #87475D; border: 1px solid #F3B5C8; border-radius: 9px; padding: 8px; font-weight: bold; } QPushButton:hover { background-color: #FFC4D6; } QPushButton:pressed { background-color: #F2A9C0; } QTableWidget { background-color: #FFFAFC; alternate-background-color: #FFF0F4; color: #704653; gridline-color: #F0C6D3; border: 1px solid #EABAC9; border-radius: 8px; } QHeaderView::section { background-color: #F8D4E0; color: #784254; padding: 7px; border: none; font-weight: bold; } QComboBox, QSpinBox { background-color: #FFFAFC; color: #704653; border: 1px solid #EABAC9; border-radius: 8px; padding: 6px; } QComboBox QAbstractItemView { background-color: #FFFAFC; color: #704653; selection-background-color: #F2A9C0; selection-color: #704653; outline: 0; } QComboBox QAbstractItemView::item { color: #704653; min-height: 28px; padding: 5px; }</string></property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item><layout class="QHBoxLayout" name="algorithmLayout">
+    <item><widget class="QLabel" name="lblTitle"><property name="text"><string>CPU Scheduling</string></property></widget></item>
+    <item><widget class="QComboBox" name="cmbAlgorithm"/></item>
+    <item><widget class="QLabel" name="lblQuantum"><property name="text"><string>Quantum:</string></property></widget></item>
+    <item><widget class="QSpinBox" name="spinQuantum"><property name="minimum"><number>1</number></property><property name="maximum"><number>1000000</number></property><property name="value"><number>2</number></property></widget></item>
+   </layout></item>
+   <item><widget class="QLabel" name="lblInput"><property name="text"><string>Process Input</string></property></widget></item>
+   <item><widget class="QTableWidget" name="tblInput"><property name="minimumSize"><size><width>0</width><height>120</height></size></property><property name="columnCount"><number>4</number></property><column><property name="text"><string>Process ID</string></property></column><column><property name="text"><string>Arrival Time</string></property></column><column><property name="text"><string>Burst Time</string></property></column><column><property name="text"><string>Priority (lower = higher)</string></property></column></widget></item>
+   <item><layout class="QHBoxLayout" name="processButtons">
+    <item><widget class="QPushButton" name="btnAddProcess"><property name="text"><string>Add Process</string></property></widget></item>
+    <item><widget class="QPushButton" name="btnRemoveProcess"><property name="text"><string>Remove Process</string></property></widget></item>
+   </layout></item>
+   <item><layout class="QHBoxLayout" name="simulationButtons">
+    <item><widget class="QPushButton" name="btnCalculate"><property name="text"><string>Run Simulation</string></property></widget></item>
+    <item><widget class="QPushButton" name="btnStepByStep"><property name="text"><string>Step-by-Step</string></property></widget></item>
+    <item><widget class="QPushButton" name="btnReset"><property name="text"><string>Reset</string></property></widget></item>
+    <item><widget class="QPushButton" name="btnClearAll"><property name="text"><string>Clear All</string></property></widget></item>
+   </layout></item>
+   <item><widget class="QLabel" name="lblResults"><property name="text"><string>Scheduling Results</string></property></widget></item>
+   <item><widget class="QTableWidget" name="tblResults"><property name="minimumSize"><size><width>0</width><height>120</height></size></property><property name="columnCount"><number>8</number></property><column><property name="text"><string>Process ID</string></property></column><column><property name="text"><string>Arrival</string></property></column><column><property name="text"><string>Burst</string></property></column><column><property name="text"><string>Priority</string></property></column><column><property name="text"><string>First Start</string></property></column><column><property name="text"><string>Finish</string></property></column><column><property name="text"><string>Waiting</string></property></column><column><property name="text"><string>Turnaround</string></property></column></widget></item>
+   <item><layout class="QHBoxLayout" name="averagesLayout">
+    <item><widget class="QLabel" name="lblAvgWaiting"><property name="text"><string>Average Waiting Time: —</string></property></widget></item>
+    <item><widget class="QLabel" name="lblAvgTurnaround"><property name="text"><string>Average Turnaround Time: —</string></property></widget></item>
+   </layout></item>
+   <item><widget class="QLabel" name="lblGantt"><property name="text"><string>Gantt Chart — Execution Order</string></property></widget></item>
+   <item><widget class="QGraphicsView" name="ganttView"><property name="minimumSize"><size><width>0</width><height>125</height></size></property><property name="maximumHeight"><number>180</number></property><property name="styleSheet"><string notr="true">QGraphicsView { background-color: #FFFAFC; border: 1px solid #EABAC9; border-radius: 8px; }</string></property></widget></item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
