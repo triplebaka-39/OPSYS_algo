@@ -16,6 +16,9 @@ from module.bankers import BankersWindow
 from module.page_replacement import PageReplacementWindow
 from module.paging import PagingWindow
 from module.fragmentation import FragmentationWindow
+from module.disk_scheduling import DiskSchedulingWindow
+from module.segmentation import SegmentationWindow
+from module.multiprogramming import MultiprogrammingWindow
 from module.typography import load_application_fonts
 from ui_main_window import Ui_MainWindow
 
@@ -144,6 +147,12 @@ class MainWindow(QMainWindow):
 
         if module_name == "Banker's Algorithm":
             window = BankersWindow(self)
+        elif module_name == "Disk Scheduling":
+            window = DiskSchedulingWindow(self)
+        elif module_name == "Segmentation":
+            window = SegmentationWindow(self)
+        elif module_name == "Multiprogramming":
+            window = MultiprogrammingWindow(self)
         elif module_name == "Fragmentation":
             window = FragmentationWindow(self)
         else:
