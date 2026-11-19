@@ -1,6 +1,6 @@
-# OPSYS_algo
+# Wandahoy_OS Simulator
 
-OPSYS_algo is a Windows desktop operating-systems simulator built with Python and
+Wandahoy_OS Simulator is a Windows desktop operating-systems simulator built with Python and
 PySide6. It provides interactive visualizations for CPU scheduling, memory
 management, paging, page replacement, disk scheduling, and resource allocation.
 
