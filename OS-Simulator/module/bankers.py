@@ -2,11 +2,13 @@
 
 import random
 
-from PySide6.QtCore import QEasingCurve, QEvent, Qt, QVariantAnimation, Signal
+from PySide6.QtCore import QEasingCurve, QEvent, QTimer, Qt, QVariantAnimation, Signal
 from PySide6.QtGui import QColor, QIntValidator, QPalette
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QDialog,
     QFrame,
+    QGridLayout,
     QHeaderView,
     QHBoxLayout,
     QLabel,
@@ -20,6 +22,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from module.theme import style_dashboard_button
 
 
 class AnimatedButton(QPushButton):
@@ -324,7 +328,7 @@ class BankersWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Banker's Algorithm | OS Simulator")
-        self.setFixedSize(1060, 820)
+        self.resize(1000, 850)
         self.setStyleSheet(
             """
             QDialog {
@@ -400,6 +404,10 @@ class BankersWindow(QDialog):
                 font-weight: 700;
                 font-size: 10pt;
             }
+            QSpinBox {
+                background-color: #FFFAFC;
+                color: #704653;
+            }
             QSpinBox QLineEdit {
                 background: #FFFAFC;
                 color: #704653;
@@ -446,10 +454,10 @@ class BankersWindow(QDialog):
                 border-color: #EABAC9;
             }
             QPushButton#resourceStep {
-                border-radius: 8px;
+                border-radius: 6px;
                 padding: 0;
-                min-height: 28px;
-                font-size: 10pt;
+                min-height: 20px;
+                font-size: 9pt;
             }
             """
         )
@@ -470,15 +478,15 @@ class BankersWindow(QDialog):
         content = QWidget()
         content.setObjectName("content")
         layout = QVBoxLayout(content)
-        layout.setContentsMargins(22, 18, 22, 22)
-        layout.setSpacing(10)
+        layout.setContentsMargins(22, 18, 22, 11)
+        layout.setSpacing(8)
         self._build_header(layout)
         self.dynamic_container = QWidget()
         self.dynamic_layout = QVBoxLayout(self.dynamic_container)
         self.dynamic_layout.setContentsMargins(0, 0, 0, 0)
         self.dynamic_layout.setSpacing(10)
         layout.addWidget(self.dynamic_container)
-        self._build_available_panel(self.dynamic_layout)
+        self._build_available_panel()
         self._build_matrix_panel(self.dynamic_layout)
         self._build_simulation_panel(self.dynamic_layout)
         self._build_controls(layout)
@@ -487,6 +495,16 @@ class BankersWindow(QDialog):
         root.setContentsMargins(0, 0, 0, 0)
         root.addWidget(content)
         self._load_sample()
+
+    def center_window(self):
+        screen = self.screen().availableGeometry()
+        window = self.frameGeometry()
+        window.moveCenter(screen.center())
+        self.move(window.topLeft())
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.center_window()
 
     def _build_header(self, parent_layout):
         header = QVBoxLayout()
@@ -502,42 +520,73 @@ class BankersWindow(QDialog):
         parent_layout.addLayout(header)
 
         dimensions = QHBoxLayout()
+        dimensions.setSpacing(8)
         dimensions.addWidget(QLabel("Processes"))
         self.process_count_input = QSpinBox()
         self.process_count_input.setRange(1, 50)
         self.process_count_input.setValue(self.process_count)
+        self.process_count_input.setFixedWidth(58)
         dimensions.addWidget(self.process_count_input)
         dimensions.addWidget(QLabel("Resource types"))
         self.resource_count_input = QSpinBox()
         self.resource_count_input.setRange(1, 10)
         self.resource_count_input.setValue(self.resource_count)
+        self.resource_count_input.setFixedWidth(58)
         dimensions.addWidget(self.resource_count_input)
-        self.apply_dimensions_button = QPushButton("Apply Dimensions")
-        self.apply_dimensions_button.clicked.connect(self._apply_dimensions)
-        dimensions.addWidget(self.apply_dimensions_button)
-        dimensions.addStretch(1)
+        self.dimensions_layout = dimensions
+
+        self.available_panel = QFrame()
+        self.available_panel.setObjectName("availablePanel")
+        available_layout = QHBoxLayout(self.available_panel)
+        available_layout.setContentsMargins(0, 0, 0, 0)
+        available_layout.setSpacing(6)
+        available_label = QLabel("Available resources")
+        available_label.setObjectName("eyebrow")
+        available_label.setSizePolicy(
+            QSizePolicy.Policy.Fixed,
+            QSizePolicy.Policy.Fixed,
+        )
+        available_layout.addWidget(available_label)
+
+        self.resource_content = QWidget()
+        self.resource_row = QHBoxLayout(self.resource_content)
+        self.resource_row.setContentsMargins(0, 0, 0, 0)
+        self.resource_row.setSpacing(2)
+        self.resource_scroll = QScrollArea()
+        self.resource_scroll.setWidgetResizable(False)
+        self.resource_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.resource_scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+        self.resource_scroll.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.resource_scroll.setFixedHeight(58)
+        self.resource_scroll.setWidget(self.resource_content)
+        available_layout.addWidget(self.resource_scroll, 1)
+        dimensions.addWidget(self.available_panel, 1)
         parent_layout.addLayout(dimensions)
 
-    def _build_available_panel(self, parent_layout):
-        panel = QFrame()
-        self.available_panel = panel
-        panel.setObjectName("availablePanel")
-        row = QHBoxLayout(panel)
-        row.setContentsMargins(0, 4, 0, 4)
+        apply_row = QHBoxLayout()
+        apply_row.addStretch(1)
+        self.apply_dimensions_button = QPushButton("Apply Dimensions")
+        self.apply_dimensions_button.clicked.connect(self._apply_dimensions)
+        apply_row.addWidget(self.apply_dimensions_button)
+        parent_layout.addLayout(apply_row)
 
-        intro = QVBoxLayout()
-        label = QLabel("Available resources")
-        label.setObjectName("eyebrow")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        intro.addWidget(label)
-        row.addLayout(intro, 1)
+    def _build_available_panel(self):
+        while self.resource_row.count():
+            item = self.resource_row.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
 
-        resource_content = QWidget()
-        resource_row = QHBoxLayout(resource_content)
-        resource_row.setContentsMargins(0, 0, 0, 0)
-        resource_row.setSpacing(4)
+        self.available_inputs = []
         for resource in self.resource_names:
-            resource_layout = QVBoxLayout()
+            resource_widget = QWidget(self.resource_content)
+            resource_layout = QVBoxLayout(resource_widget)
+            resource_layout.setContentsMargins(0, 0, 0, 0)
+            resource_layout.setSpacing(1)
             name = QLabel(resource)
             name.setObjectName("eyebrow")
             name.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -546,35 +595,31 @@ class BankersWindow(QDialog):
             value.setAlignment(Qt.AlignmentFlag.AlignCenter)
             value.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
             value.setFrame(False)
-            value.setFixedWidth(64)
-            value.setFixedHeight(34)
+            value.setFixedWidth(42)
+            value.setFixedHeight(28)
             value.setAccessibleName("Available Resource " + resource)
             value.setToolTip("Number of free units of Resource " + resource)
             value.valueChanged.connect(self._other_input_changed)
             self.available_inputs.append(value)
             controls = QHBoxLayout()
-            controls.setSpacing(5)
+            controls.setContentsMargins(0, 0, 0, 0)
+            controls.setSpacing(2)
             decrease = self._resource_step_button("-", "Decrease", resource)
             increase = self._resource_step_button("+", "Increase", resource)
             decrease.clicked.connect(value.stepDown)
             increase.clicked.connect(value.stepUp)
-            controls.addStretch(1)
             controls.addWidget(decrease)
             controls.addWidget(value)
             controls.addWidget(increase)
-            controls.addStretch(1)
             resource_layout.addWidget(name)
             resource_layout.addLayout(controls)
-            resource_row.addLayout(resource_layout, 1)
-        resource_scroll = QScrollArea()
-        resource_scroll.setWidgetResizable(True)
-        resource_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        resource_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        resource_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        resource_scroll.setFixedHeight(76)
-        resource_scroll.setWidget(resource_content)
-        row.addWidget(resource_scroll, 3)
-        parent_layout.addWidget(panel)
+            self.resource_row.addWidget(resource_widget)
+        self.resource_row.addStretch(1)
+        QTimer.singleShot(0, self._resize_resource_content)
+
+    def _resize_resource_content(self):
+        self.resource_row.activate()
+        self.resource_content.setFixedSize(self.resource_row.sizeHint())
 
     @staticmethod
     def _resource_step_button(text, action, resource):
@@ -582,7 +627,7 @@ class BankersWindow(QDialog):
         button.setObjectName("resourceStep")
         button.setAccessibleName("%s available Resource %s" % (action, resource))
         button.setToolTip("%s available units of Resource %s" % (action, resource))
-        button.setFixedSize(28, 32)
+        button.setFixedSize(20, 24)
         button.set_color_scheme(
             "#FFDCE6", "#704653", "#EABAC9",
             "#F2A9C0", "#704653", "#C45B7A",
@@ -602,30 +647,51 @@ class BankersWindow(QDialog):
         title_row.addWidget(title)
         layout.addLayout(title_row)
 
-        group_headers = QHBoxLayout()
+        group_header_content = QWidget()
+        group_header_content.setStyleSheet("background: transparent;")
+        group_headers = QGridLayout(group_header_content)
+        group_headers.setContentsMargins(1, 0, 1, 0)
+        group_headers.setHorizontalSpacing(0)
+        group_headers.setVerticalSpacing(0)
         process_header = QLabel("Process")
-        process_header.setFixedWidth(105)
-        group_headers.addWidget(process_header)
         allocation_header = QLabel("Allocation")
-        group_headers.addWidget(allocation_header, 1)
         maximum_header = QLabel("Max")
-        group_headers.addWidget(maximum_header, 1)
         need_header = QLabel("Need")
-        group_headers.addWidget(need_header, 1)
-        for label in (
+        group_header_labels = (
             process_header,
             allocation_header,
             maximum_header,
             need_header,
-        ):
+        )
+        for column, label in enumerate(group_header_labels):
             label.setObjectName("eyebrow")
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            label.setSizePolicy(
+                QSizePolicy.Policy.Fixed,
+                QSizePolicy.Policy.Fixed,
+            )
             label.setStyleSheet(
                 'font-family: "Nunito"; font-size: 10pt;'
                 " font-weight: 700;"
                 + (" color: #C45B7A;" if label is need_header else "")
             )
-        layout.addLayout(group_headers)
+            group_headers.addWidget(label, 0, column)
+        group_header_scroll = QScrollArea()
+        group_header_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        group_header_scroll.setSizePolicy(
+            QSizePolicy.Policy.Ignored,
+            QSizePolicy.Policy.Fixed,
+        )
+        group_header_scroll.setFixedHeight(process_header.sizeHint().height())
+        group_header_scroll.setWidgetResizable(False)
+        group_header_scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        group_header_scroll.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        group_header_scroll.setWidget(group_header_content)
+        layout.addWidget(group_header_scroll)
 
         resource_headers = self.resource_names
         headers = (["PID"] + ["Alloc " + name for name in resource_headers]
@@ -644,13 +710,32 @@ class BankersWindow(QDialog):
         self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.table.verticalHeader().setDefaultSectionSize(36)
         self.table.verticalHeader().setVisible(False)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.table.setColumnWidth(0, 70)
-        for column in range(1, len(headers)):
-            self.table.setColumnWidth(column, 84)
+        self.table.horizontalHeader().setMinimumSectionSize(64)
+        self.table.setHorizontalScrollMode(
+            QAbstractItemView.ScrollMode.ScrollPerPixel
+        )
         self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self._group_header_scroll = group_header_scroll
+        self._group_header_content = group_header_content
+        self._group_header_labels = group_header_labels
+        self.table.horizontalHeader().sectionResized.connect(
+            self._sync_group_headers
+        )
+        self.table.horizontalHeader().geometriesChanged.connect(
+            self._sync_group_headers
+        )
+        self.table.horizontalScrollBar().rangeChanged.connect(
+            self._sync_group_headers
+        )
+        self.table.horizontalScrollBar().valueChanged.connect(
+            group_header_scroll.horizontalScrollBar().setValue
+        )
+        group_header_scroll.horizontalScrollBar().valueChanged.connect(
+            self.table.horizontalScrollBar().setValue
+        )
 
         for process in range(self.process_count):
             process_item = QTableWidgetItem("P%d" % process)
@@ -694,6 +779,38 @@ class BankersWindow(QDialog):
         self.table.setFixedHeight(min(224, 44 + 36 * self.process_count))
         layout.addWidget(self.table)
         parent_layout.addWidget(panel)
+        self._sync_group_headers()
+
+    def _sync_group_headers(self, *_section_resize_args):
+        column_count = self.resource_count
+        group_widths = (
+            self.table.columnWidth(0),
+            sum(
+                self.table.columnWidth(column)
+                for column in range(1, column_count + 1)
+            ),
+            sum(
+                self.table.columnWidth(column)
+                for column in range(column_count + 1, 2 * column_count + 1)
+            ),
+            sum(
+                self.table.columnWidth(column)
+                for column in range(2 * column_count + 1, 3 * column_count + 1)
+            ),
+        )
+        for label, width in zip(self._group_header_labels, group_widths):
+            label.setFixedWidth(width)
+
+        header_bar = self._group_header_scroll.horizontalScrollBar()
+        table_bar = self.table.horizontalScrollBar()
+        content_width = max(
+            sum(group_widths) + 2,
+            self._group_header_scroll.viewport().width() + table_bar.maximum(),
+        )
+        self._group_header_content.setFixedWidth(content_width)
+        header_bar.setPageStep(self._group_header_scroll.viewport().width())
+        header_bar.setRange(0, max(0, content_width - header_bar.pageStep()))
+        header_bar.setValue(table_bar.value())
 
     def _build_simulation_panel(self, parent_layout):
         panel = QFrame()
@@ -814,15 +931,8 @@ class BankersWindow(QDialog):
         row.addWidget(self.random_button)
         row.addWidget(self.run_button)
         parent_layout.addLayout(row)
-        self.dashboard_button = AnimatedButton("Back to Dashboard")
-        self.dashboard_button.set_color_scheme(
-            "#FFDCE6", "#704653", "#EABAC9",
-            "#F2A9C0", "#704653", "#C45B7A",
-        )
-        self.dashboard_button.setFixedHeight(42)
-        self.dashboard_button.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
-        )
+        self.dashboard_button = QPushButton("Back to Dashboard")
+        style_dashboard_button(self.dashboard_button)
         self.dashboard_button.setAccessibleName("Back to Dashboard")
         self.dashboard_button.setToolTip("Close this simulator and return to the dashboard.")
         self.dashboard_button.clicked.connect(self.close)
@@ -892,7 +1002,7 @@ class BankersWindow(QDialog):
         self.work_values = [0] * self.resource_count
         self.completed_processes = set()
         self.sequence = []
-        self._build_available_panel(self.dynamic_layout)
+        self._build_available_panel()
         self._build_matrix_panel(self.dynamic_layout)
         self._build_simulation_panel(self.dynamic_layout)
         self._refreshing = False

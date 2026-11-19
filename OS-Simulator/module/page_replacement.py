@@ -10,7 +10,6 @@ from PySide6.QtWidgets import (
     QPushButton,
     QComboBox,
     QLineEdit,
-    QSizePolicy,
     QSpinBox,
     QTableWidget,
     QTableWidgetItem,
@@ -24,12 +23,14 @@ from PySide6.QtWidgets import (
 )
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor
 
 from algorithms.page_replacement import (
     fifo,
     lru,
     optimal
 )
+from module.theme import style_dashboard_button
 from module.typography import load_application_fonts
 
 
@@ -76,7 +77,7 @@ class PageReplacementWindow(QDialog):
 
         # Main layout
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(24, 20, 24, 20)
+        main_layout.setContentsMargins(24, 20, 24, 11)
         main_layout.setSpacing(15)
 
         # -----------------------------------
@@ -165,10 +166,7 @@ class PageReplacementWindow(QDialog):
         self.btnClear.setObjectName("secondaryButton")
 
         self.btnBackToDashboard = QPushButton("Back to Dashboard")
-        self.btnBackToDashboard.setObjectName("secondaryButton")
-        self.btnBackToDashboard.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
-        )
+        style_dashboard_button(self.btnBackToDashboard)
         button_layout.addWidget(self.btnSimulate)
         button_layout.addWidget(self.btnStartStepByStep)
         button_layout.addWidget(self.btnNextStep)
@@ -507,11 +505,9 @@ class PageReplacementWindow(QDialog):
             item = QTableWidgetItem(str(value))
             item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             if column == len(values) - 1:
-                item.setForeground(
-                    Qt.GlobalColor.darkGreen if value == "Hit" else Qt.GlobalColor.darkRed
-                )
+                item.setForeground(QColor("#704653"))
             elif 2 <= column < 2 + frame_count and value != previous_frames[column - 2]:
-                item.setBackground(Qt.GlobalColor.lightGray)
+                item.setBackground(QColor("#FFF0F3"))
             table.setItem(row, column, item)
         table.resizeRowsToContents()
         table.scrollToBottom()
@@ -567,10 +563,7 @@ class PageReplacementWindow(QDialog):
                 item = QTableWidgetItem(str(value))
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 if column == len(values) - 1:
-                    if value == "Hit":
-                        item.setForeground(Qt.GlobalColor.darkGreen)
-                    else:
-                        item.setForeground(Qt.GlobalColor.darkRed)
+                    item.setForeground(QColor("#704653"))
 
                 table.setItem(row, column, item)
 

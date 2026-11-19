@@ -14,12 +14,12 @@ from PySide6.QtWidgets import (
     QGraphicsScene,
     QGraphicsView,
     QWidget,
-    QSizePolicy,
 )
 from PySide6.QtGui import QColor, QFont, QPen, QBrush
 from PySide6.QtCore import Qt
 
 from algorithms.segmentation import translate_segment_address
+from module.theme import style_dashboard_button
 
 SEGMENT_COLORS = [
     "#F6B6C8",  # Rose
@@ -53,7 +53,7 @@ class SegmentationWindow(QDialog):
 
     def _build_ui(self):
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(24, 20, 24, 20)
+        main_layout.setContentsMargins(24, 20, 24, 11)
         main_layout.setSpacing(12)
 
         # Header Title
@@ -140,10 +140,10 @@ class SegmentationWindow(QDialog):
         main_layout.addLayout(body_layout, 1)
 
         # Footer Back Button
-        btnBack = QPushButton("Back to Dashboard")
-        btnBack.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        btnBack.clicked.connect(self.close)
-        main_layout.addWidget(btnBack)
+        self.btnBackToDashboard = QPushButton("Back to Dashboard")
+        style_dashboard_button(self.btnBackToDashboard)
+        self.btnBackToDashboard.clicked.connect(self.close)
+        main_layout.addWidget(self.btnBackToDashboard)
 
     def _load_default_segments(self):
         """Standard operating systems textbook segmentation example."""
@@ -229,15 +229,15 @@ class SegmentationWindow(QDialog):
 
         if res["success"]:
             self.lblResult.setStyleSheet(
-                "background-color: #EBF8EE; color: #2E6B3E; "
-                "border: 1px solid #B6E5C2; border-radius: 8px; padding: 10px; font-weight: 600;"
+                "background-color: #FFFAFC; color: #704653; "
+                "border: 1px solid #EABAC9; border-radius: 8px; padding: 10px; font-weight: 600;"
             )
             self.lblResult.setText(f"✅ {res['message']}")
             self._draw_memory_bar(highlight_addr=res["physical_address"], highlight_seg=seg_num)
         else:
             self.lblResult.setStyleSheet(
-                "background-color: #FFF0F0; color: #C43D43; "
-                "border: 1px solid #F5B5B7; border-radius: 8px; padding: 10px; font-weight: 600;"
+                "background-color: #FFDCE6; color: #704653; "
+                "border: 1px solid #C45B7A; border-radius: 8px; padding: 10px; font-weight: 600;"
             )
             self.lblResult.setText(f"❌ {res['message']}")
             self._draw_memory_bar(highlight_seg=seg_num, fault=True)

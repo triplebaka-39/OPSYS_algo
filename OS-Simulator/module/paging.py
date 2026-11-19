@@ -25,6 +25,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from module.theme import style_dashboard_button
+
 
 DEFAULT_PROCESS_SIZE = 1700
 DEFAULT_PAGE_SIZE = 256
@@ -122,7 +124,7 @@ class PagingWindow(QDialog):
 
     def _build_ui(self):
         outer_layout = QVBoxLayout(self)
-        outer_layout.setContentsMargins(16, 12, 16, 12)
+        outer_layout.setContentsMargins(16, 12, 16, 11)
         outer_layout.setSpacing(8)
 
         content = QWidget()
@@ -286,15 +288,10 @@ class PagingWindow(QDialog):
         right_layout.addWidget(translation_group)
 
         self.btnBackToDashboard = QPushButton("Back to Dashboard")
-        self.btnBackToDashboard.setObjectName("secondaryButton")
-        self.btnBackToDashboard.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
-        )
-        self.btnBackToDashboard.setMinimumHeight(42)
-        right_layout.addStretch(1)
-        right_layout.addWidget(self.btnBackToDashboard)
+        style_dashboard_button(self.btnBackToDashboard)
         workspace_layout.addWidget(right_panel, 2)
         content_layout.addLayout(workspace_layout, 1)
+        outer_layout.addWidget(self.btnBackToDashboard)
 
     @staticmethod
     def _size_input(minimum, maximum, value):
@@ -322,6 +319,28 @@ class PagingWindow(QDialog):
             QScrollArea {
                 background-color: #FFF0F3;
                 border: none;
+            }
+
+            QAbstractScrollArea,
+            QAbstractScrollArea::viewport {
+                background-color: #FFFAFC;
+            }
+
+            QAbstractScrollArea::corner {
+                background-color: #FFDCE6;
+            }
+
+            QScrollArea::viewport {
+                background-color: #FFF0F3;
+            }
+
+            QHeaderView {
+                background-color: #FFDCE6;
+            }
+
+            QTableCornerButton::section {
+                background-color: #FFDCE6;
+                border: 1px solid #EABAC9;
             }
 
             QLabel {
@@ -452,6 +471,10 @@ class PagingWindow(QDialog):
                 selection-background-color: #F2A9C0;
                 selection-color: #704653;
                 font-size: 10pt;
+            }
+
+            QTableWidget::viewport {
+                background-color: #FFFAFC;
             }
 
             QTableWidget::item {

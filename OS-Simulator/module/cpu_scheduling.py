@@ -198,7 +198,7 @@ class CpuSchedulingWindow(QDialog):
             x = left + segment["start"] * scale
             block_width = max((segment["finish"] - segment["start"]) * scale, 1)
             if segment["pid"] is None:
-                brush = QBrush(QColor("#E8E1E3"))
+                brush = QBrush(QColor("#FFF0F3"))
                 label = "Idle"
             else:
                 brush = QBrush(colors[segment["pid"]])

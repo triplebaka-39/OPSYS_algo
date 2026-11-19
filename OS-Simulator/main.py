@@ -19,6 +19,7 @@ from module.fragmentation import FragmentationWindow
 from module.disk_scheduling import DiskSchedulingWindow
 from module.segmentation import SegmentationWindow
 from module.multiprogramming import MultiprogrammingWindow
+from module.theme import apply_application_palette
 from module.typography import load_application_fonts
 from ui_main_window import Ui_MainWindow
 
@@ -217,6 +218,7 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)
+    apply_application_palette(app)
     load_application_fonts(app)
 
     window = MainWindow()

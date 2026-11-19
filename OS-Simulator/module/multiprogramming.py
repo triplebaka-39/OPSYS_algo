@@ -14,7 +14,6 @@ from PySide6.QtWidgets import (
     QGraphicsScene,
     QGraphicsView,
     QWidget,
-    QSizePolicy,
     QSpinBox,
     QDoubleSpinBox,
 )
@@ -22,6 +21,7 @@ from PySide6.QtGui import QColor, QFont, QPen, QBrush
 from PySide6.QtCore import Qt
 
 from algorithms.multiprogramming import simulate_multiprogramming, calculate_cpu_utilization
+from module.theme import style_dashboard_button
 
 JOB_COLORS = [
     "#F6B6C8",  # Rose
@@ -57,7 +57,7 @@ class MultiprogrammingWindow(QDialog):
 
     def _build_ui(self):
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(24, 20, 24, 20)
+        main_layout.setContentsMargins(24, 20, 24, 11)
         main_layout.setSpacing(12)
 
         # Header Title
@@ -166,10 +166,10 @@ class MultiprogrammingWindow(QDialog):
         main_layout.addLayout(bot_layout, 1)
 
         # Footer Back Button
-        btnBack = QPushButton("Back to Dashboard")
-        btnBack.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        btnBack.clicked.connect(self.close)
-        main_layout.addWidget(btnBack)
+        self.btnBackToDashboard = QPushButton("Back to Dashboard")
+        style_dashboard_button(self.btnBackToDashboard)
+        self.btnBackToDashboard.clicked.connect(self.close)
+        main_layout.addWidget(self.btnBackToDashboard)
 
     def _load_defaults(self):
         defaults = [

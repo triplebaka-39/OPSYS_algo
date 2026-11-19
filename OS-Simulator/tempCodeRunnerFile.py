@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
 )
 
 from module.bankers import BankersWindow
+from module.theme import apply_application_palette
 from ui_main_window import Ui_MainWindow
 
 
@@ -152,6 +153,7 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
 
     app = QApplication(sys.argv)
+    apply_application_palette(app)
     app.setFont(QFont("Inter"))
 
     window = MainWindow()

@@ -14,7 +14,6 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QPushButton,
     QScrollArea,
-    QSizePolicy,
     QSpinBox,
     QComboBox,
     QTableWidget,
@@ -31,6 +30,7 @@ from algorithms.disk_scheduling import (
     look,
     c_look,
 )
+from module.theme import style_dashboard_button
 
 
 ALGORITHMS = {
@@ -66,7 +66,7 @@ class DiskSchedulingWindow(QDialog):
 
     def _build_ui(self):
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(24, 20, 24, 20)
+        main_layout.setContentsMargins(24, 20, 24, 11)
         main_layout.setSpacing(12)
 
         # Header Title
@@ -160,7 +160,7 @@ class DiskSchedulingWindow(QDialog):
 
         # Footer Back Button
         self.btnBackToDashboard = QPushButton("Back to Dashboard")
-        self.btnBackToDashboard.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        style_dashboard_button(self.btnBackToDashboard)
         self.btnBackToDashboard.clicked.connect(self.close)
         main_layout.addWidget(self.btnBackToDashboard)
 

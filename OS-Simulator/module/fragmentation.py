@@ -16,7 +16,6 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QSizePolicy,
     QSpinBox,
     QScrollArea,
     QTableWidget,
@@ -24,6 +23,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from module.theme import style_dashboard_button
 
 
 DEFAULT_BLOCKS = (100, 300, 200)
@@ -63,7 +64,7 @@ class FragmentationWindow(QDialog):
 
     def _build_ui(self):
         root_layout = QVBoxLayout(self)
-        root_layout.setContentsMargins(12, 8, 12, 8)
+        root_layout.setContentsMargins(12, 8, 12, 11)
         root_layout.setSpacing(8)
 
         content = QWidget()
@@ -236,13 +237,8 @@ class FragmentationWindow(QDialog):
         right_layout.addWidget(allocation_group)
 
         self.btnBackToDashboard = QPushButton("Back to Dashboard")
-        self.btnBackToDashboard.setObjectName("secondaryButton")
-        self.btnBackToDashboard.setMinimumHeight(38)
-        self.btnBackToDashboard.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
-        )
-        right_layout.addStretch(1)
-        right_layout.addWidget(self.btnBackToDashboard)
+        style_dashboard_button(self.btnBackToDashboard)
+        root_layout.addWidget(self.btnBackToDashboard)
 
         for size in DEFAULT_BLOCKS:
             self._add_memory_block(size, refresh=False)
