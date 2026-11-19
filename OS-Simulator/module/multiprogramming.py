@@ -189,14 +189,20 @@ class MultiprogrammingWindow(QDialog):
 
     def _get_jobs(self):
         jobs = []
+        identifiers = set()
         for r in range(self.tblJobs.rowCount()):
             j_item = self.tblJobs.item(r, 0)
             a_item = self.tblJobs.item(r, 1)
             r_item = self.tblJobs.item(r, 2)
             b_item = self.tblJobs.item(r, 3)
             if not all([j_item, a_item, r_item, b_item]):
-                continue
+                raise ValueError(f"Complete all fields in row {r + 1}.")
             jid = j_item.text().strip()
+            if not jid:
+                raise ValueError(f"Job ID is missing in row {r + 1}.")
+            if jid in identifiers:
+                raise ValueError(f"Duplicate Job ID: {jid}")
+            identifiers.add(jid)
             try:
                 arr = int(a_item.text().strip())
                 size = int(r_item.text().strip())

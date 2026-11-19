@@ -1,8 +1,32 @@
 """CPU scheduling algorithms used by the simulator."""
 
 
+def _validate_processes(processes, needs_priority=False):
+    if not processes:
+        raise ValueError("At least one process is required.")
+    seen = set()
+    for index, process in enumerate(processes, start=1):
+        if not isinstance(process, dict):
+            raise ValueError(f"Process {index} must be a mapping of process fields.")
+        pid = str(process.get("pid", "")).strip()
+        if not pid:
+            raise ValueError(f"Process ID is missing for process {index}.")
+        if pid in seen:
+            raise ValueError(f"Duplicate Process ID: {pid}")
+        seen.add(pid)
+        for field in ("arrival", "burst"):
+            value = process.get(field)
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise ValueError(f"{field.title()} time for {pid} must be a whole number.")
+            if (field == "arrival" and value < 0) or (field == "burst" and value <= 0):
+                raise ValueError(f"{field.title()} time for {pid} is out of range.")
+        if needs_priority:
+            priority = process.get("priority")
+            if not isinstance(priority, int) or isinstance(priority, bool):
+                raise ValueError(f"Priority for {pid} must be a whole number.")
+
+
 def _result(processes, schedule):
-    by_pid = {process["pid"]: process for process in processes}
     completion = {}
     first_start = {}
     for segment in schedule:
@@ -58,10 +82,12 @@ def _non_preemptive(processes, key):
 
 
 def fcfs(processes):
+    _validate_processes(processes)
     return _non_preemptive(processes, lambda process, index: (process["arrival"], index))
 
 
 def sjf(processes):
+    _validate_processes(processes)
     return _non_preemptive(
         processes,
         lambda process, index: (process["burst"], process["arrival"], index),
@@ -70,6 +96,7 @@ def sjf(processes):
 
 def priority_scheduling(processes):
     """Non-preemptive priority; a smaller numeric priority means higher priority."""
+    _validate_processes(processes, needs_priority=True)
     return _non_preemptive(
         processes,
         lambda process, index: (
@@ -79,6 +106,9 @@ def priority_scheduling(processes):
 
 
 def round_robin(processes, quantum):
+    _validate_processes(processes)
+    if not isinstance(quantum, int) or isinstance(quantum, bool):
+        raise ValueError("Time quantum must be a whole number.")
     if quantum <= 0:
         raise ValueError("Time quantum must be greater than zero.")
 

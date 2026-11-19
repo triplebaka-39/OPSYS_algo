@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QSpinBox,
+    QScrollArea,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -27,7 +28,7 @@ from PySide6.QtWidgets import (
 
 DEFAULT_BLOCKS = (100, 300, 200)
 DEFAULT_PROCESSES = (("P1", 70), ("P2", 180), ("P3", 180), ("P4", 150))
-MAX_INPUT_ROWS = 6
+MAX_INPUT_ROWS = 50
 MAX_MEMORY_SIZE = 16384
 
 
@@ -107,10 +108,15 @@ class FragmentationWindow(QDialog):
         self.lblMemoryHint.setObjectName("helperText")
         memory_layout.addWidget(self.lblMemoryHint)
 
-        self.memory_visual_layout = QVBoxLayout()
+        self.memory_visual_scroll = QScrollArea()
+        self.memory_visual_scroll.setWidgetResizable(True)
+        self.memory_visual_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.memory_visual_container = QWidget()
+        self.memory_visual_layout = QVBoxLayout(self.memory_visual_container)
         self.memory_visual_layout.setContentsMargins(0, 0, 0, 0)
         self.memory_visual_layout.setSpacing(8)
-        memory_layout.addLayout(self.memory_visual_layout, 1)
+        self.memory_visual_scroll.setWidget(self.memory_visual_container)
+        memory_layout.addWidget(self.memory_visual_scroll, 1)
 
         legend_layout = QHBoxLayout()
         legend_layout.setSpacing(6)
@@ -656,6 +662,12 @@ class FragmentationWindow(QDialog):
         return candidates[0]
 
     def start_simulation(self):
+        names = [process["name"].strip() for process in self._read_processes()]
+        if len(set(names)) != len(names):
+            self.lblStepExplanation.setText(
+                "Process names must be unique so allocation results are clear."
+            )
+            return
         self._reset_simulation_state()
         self.simulation_started = True
         self.btnNextStep.setEnabled(bool(self.process_rows))

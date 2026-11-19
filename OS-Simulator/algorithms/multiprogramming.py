@@ -1,6 +1,46 @@
 """Multiprogramming simulation engine (Degree of Multiprogramming, Memory Admittance, and CPU Utilization)."""
 
 
+def _validate(jobs, total_memory, os_reserved, max_dom, io_fraction):
+    if not jobs:
+        raise ValueError("At least one job is required.")
+    for label, value in (("Total RAM", total_memory), ("OS reserved RAM", os_reserved),
+                         ("Maximum degree of multiprogramming", max_dom)):
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise ValueError(f"{label} must be a whole number.")
+    if total_memory <= 0 or os_reserved < 0 or os_reserved >= total_memory:
+        raise ValueError("OS reserved RAM must be non-negative and less than total RAM.")
+    if max_dom <= 0:
+        raise ValueError("Maximum degree of multiprogramming must be greater than zero.")
+    if not isinstance(io_fraction, (int, float)) or isinstance(io_fraction, bool):
+        raise ValueError("I/O wait ratio must be a number between 0 and 1.")
+    if not 0 <= io_fraction <= 1:
+        raise ValueError("I/O wait ratio must be between 0 and 1.")
+
+    available_ram = total_memory - os_reserved
+    identifiers = set()
+    for index, job in enumerate(jobs, start=1):
+        if not isinstance(job, dict):
+            raise ValueError(f"Job {index} must include an ID, arrival, size, and burst.")
+        jid = str(job.get("jid", "")).strip()
+        if not jid:
+            raise ValueError(f"Job ID is missing in row {index}.")
+        if jid in identifiers:
+            raise ValueError(f"Duplicate Job ID: {jid}")
+        identifiers.add(jid)
+        for field in ("arrival", "size", "burst"):
+            value = job.get(field)
+            if not isinstance(value, int) or isinstance(value, bool):
+                raise ValueError(f"{field.title()} for {jid} must be a whole number.")
+            if (field == "arrival" and value < 0) or (field != "arrival" and value <= 0):
+                raise ValueError(f"{field.title()} for {jid} is out of range.")
+        if job["size"] > available_ram:
+            raise ValueError(
+                f"Job {jid} needs {job['size']} KB, more than the "
+                f"{available_ram} KB available to jobs."
+            )
+
+
 def calculate_cpu_utilization(io_wait_fraction, degree_of_multiprogramming):
     """
     Computes theoretical CPU utilization based on the probabilistic multiprogramming model:
@@ -9,9 +49,17 @@ def calculate_cpu_utilization(io_wait_fraction, degree_of_multiprogramming):
         p = fraction of time a process spends waiting for I/O (0.0 to 1.0)
         n = degree of multiprogramming (number of concurrent processes in memory)
     """
-    if degree_of_multiprogramming <= 0:
+    if not isinstance(degree_of_multiprogramming, int) or isinstance(degree_of_multiprogramming, bool):
+        raise ValueError("Degree of multiprogramming must be a whole number.")
+    if degree_of_multiprogramming < 0:
+        raise ValueError("Degree of multiprogramming cannot be negative.")
+    if not isinstance(io_wait_fraction, (int, float)) or isinstance(io_wait_fraction, bool):
+        raise ValueError("I/O wait fraction must be a number between zero and one.")
+    if not 0 <= io_wait_fraction <= 1:
+        raise ValueError("I/O wait fraction must be between zero and one.")
+    if degree_of_multiprogramming == 0:
         return 0.0
-    p = max(0.0, min(1.0, float(io_wait_fraction)))
+    p = float(io_wait_fraction)
     return (1.0 - (p ** degree_of_multiprogramming)) * 100.0
 
 
@@ -29,9 +77,8 @@ def simulate_multiprogramming(jobs, total_memory, os_reserved, max_dom, io_fract
     Returns:
         dict with execution timeline, per-job results, utilization stats, and memory logs.
     """
+    _validate(jobs, total_memory, os_reserved, max_dom, io_fraction)
     available_ram = total_memory - os_reserved
-    if available_ram <= 0:
-        raise ValueError("OS reserved memory exceeds or equals total RAM.")
 
     # Sort jobs by arrival time
     sorted_jobs = sorted(jobs, key=lambda j: (j["arrival"], j["jid"]))
@@ -87,7 +134,11 @@ def simulate_multiprogramming(jobs, total_memory, os_reserved, max_dom, io_fract
             if unadmitted_idx < total_jobs:
                 time = sorted_jobs[unadmitted_idx]["arrival"]
             else:
-                break
+                waiting = ", ".join(job["jid"] for job in waiting_queue)
+                raise ValueError(
+                    "Jobs could not be admitted with the selected memory and "
+                    f"degree limits: {waiting}."
+                )
             continue
 
         # Execute processes: In multiprogramming, processes advance concurrently

@@ -32,6 +32,10 @@ DEFAULT_PHYSICAL_MEMORY_SIZE = 1024
 
 
 def calculate_page_counts(process_size, page_size, physical_memory_size):
+    for label, value in (("Process size", process_size), ("Page size", page_size),
+                         ("Physical memory size", physical_memory_size)):
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise ValueError(f"{label} must be a whole number.")
     if process_size <= 0:
         raise ValueError("Process size must be greater than zero.")
     if page_size <= 0:
@@ -53,6 +57,10 @@ def translate_logical_address(
     page_to_frame,
 ):
     calculate_page_counts(process_size, page_size, physical_memory_size)
+    if not isinstance(logical_address, int) or isinstance(logical_address, bool):
+        raise ValueError("Logical address must be a whole number.")
+    if not isinstance(page_to_frame, dict):
+        raise ValueError("Page table must be a mapping of pages to frames.")
     if logical_address < 0 or logical_address >= process_size:
         raise ValueError(
             "Logical address must be between 0 and %d."
@@ -66,6 +74,8 @@ def translate_logical_address(
         raise ValueError(
             "Page %d does not have a physical frame assigned yet." % page
         )
+    if not isinstance(frame, int) or isinstance(frame, bool) or frame < 0:
+        raise ValueError("Page table frame entries must be non-negative whole numbers.")
 
     physical_address = frame * page_size + offset
     if physical_address >= physical_memory_size:

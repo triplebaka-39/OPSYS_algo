@@ -103,16 +103,23 @@ class CpuSchedulingWindow(QDialog):
 
     def read_processes(self):
         processes = []
+        needs_priority = self.ui.cmbAlgorithm.currentText() == "Priority (Non-preemptive)"
         for row in range(self.ui.tblInput.rowCount()):
             values = []
-            for column in range(4):
+            for column in range(3):
                 item = self.ui.tblInput.item(row, column)
                 value = item.text().strip() if item else ""
                 if not value:
                     raise ValueError(f"Complete all fields in row {row + 1}.")
                 values.append(value)
 
-            pid, arrival_text, burst_text, priority_text = values
+            priority_item = self.ui.tblInput.item(row, 3)
+            priority_text = priority_item.text().strip() if priority_item else ""
+            if needs_priority and not priority_text:
+                raise ValueError(f"Priority is required for {values[0]}.")
+            if not priority_text:
+                priority_text = "0"
+            pid, arrival_text, burst_text = values
             if any(process["pid"] == pid for process in processes):
                 raise ValueError(f"Duplicate Process ID: {pid}")
             try:

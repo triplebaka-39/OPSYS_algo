@@ -164,7 +164,7 @@ class SegmentationWindow(QDialog):
         self.tblSegments.blockSignals(False)
         self._draw_memory_bar()
 
-    def _get_segment_dict(self):
+    def _get_segment_dict(self, strict=False):
         segments = {}
         for r in range(self.tblSegments.rowCount()):
             s_item = self.tblSegments.item(r, 0)
@@ -172,15 +172,44 @@ class SegmentationWindow(QDialog):
             b_item = self.tblSegments.item(r, 2)
             l_item = self.tblSegments.item(r, 3)
             if not all([s_item, b_item, l_item]):
+                if strict:
+                    raise ValueError(f"Complete all required fields in segment row {r + 1}.")
                 continue
             try:
                 s = int(s_item.text().strip())
                 base = int(b_item.text().strip())
                 lim = int(l_item.text().strip())
                 name = n_item.text().strip() if n_item else f"Seg {s}"
-                segments[s] = {"name": name, "base": base, "limit": lim}
-            except ValueError:
+            except ValueError as error:
+                if strict:
+                    raise ValueError(
+                        f"Segment number, base, and limit in row {r + 1} must be whole numbers."
+                    ) from error
                 continue
+            if s < 0 or base < 0 or lim <= 0:
+                if strict:
+                    raise ValueError(
+                        f"Segment row {r + 1} needs a non-negative segment number and base, "
+                        "and a positive limit."
+                    )
+                continue
+            if s in segments:
+                if strict:
+                    raise ValueError(f"Duplicate segment number: {s}.")
+                continue
+            segments[s] = {"name": name or f"Seg {s}", "base": base, "limit": lim}
+        if strict:
+            ordered = sorted(
+                (item["base"], item["base"] + item["limit"], number)
+                for number, item in segments.items()
+            )
+            for previous, current in zip(ordered, ordered[1:]):
+                if current[0] < previous[1]:
+                    raise ValueError(
+                        f"Segments {previous[2]} and {current[2]} overlap in physical memory."
+                    )
+        if strict and not segments:
+            raise ValueError("Add at least one valid segment before translating an address.")
         return segments
 
     def translate(self):
@@ -191,7 +220,11 @@ class SegmentationWindow(QDialog):
             QMessageBox.warning(self, "Input Error", "Segment number and offset must be whole integers.")
             return
 
-        table = self._get_segment_dict()
+        try:
+            table = self._get_segment_dict(strict=True)
+        except ValueError as error:
+            QMessageBox.warning(self, "Invalid Segment Table", str(error))
+            return
         res = translate_segment_address(table, seg_num, offset)
 
         if res["success"]:
@@ -264,9 +297,16 @@ class SegmentationWindow(QDialog):
 
     def _add_row(self):
         r = self.tblSegments.rowCount()
+        used_ids = set()
+        for row in range(r):
+            try:
+                used_ids.add(int(self.tblSegments.item(row, 0).text().strip()))
+            except (AttributeError, ValueError):
+                pass
+        next_id = max(used_ids, default=-1) + 1
         self.tblSegments.insertRow(r)
-        self.tblSegments.setItem(r, 0, QTableWidgetItem(str(r)))
-        self.tblSegments.setItem(r, 1, QTableWidgetItem(f"Segment {r}"))
+        self.tblSegments.setItem(r, 0, QTableWidgetItem(str(next_id)))
+        self.tblSegments.setItem(r, 1, QTableWidgetItem(f"Segment {next_id}"))
         self.tblSegments.setItem(r, 2, QTableWidgetItem("0"))
         self.tblSegments.setItem(r, 3, QTableWidgetItem("500"))
         self._draw_memory_bar()

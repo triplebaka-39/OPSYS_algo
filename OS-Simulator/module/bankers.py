@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QSpinBox,
+    QScrollArea,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -253,17 +254,31 @@ SAMPLE_AVAILABLE = (3, 3, 2)
 
 def find_safe_sequence(allocation, maximum, available):
     """Return a safe sequence, or None when the state is unsafe."""
+    if not isinstance(allocation, (list, tuple)) or not isinstance(maximum, (list, tuple)):
+        raise ValueError("Allocation and maximum must be process-by-resource tables.")
+    if not isinstance(available, (list, tuple)):
+        raise ValueError("Available resources must be a list of whole numbers.")
     process_count = len(allocation)
+    resource_count = len(available)
+    if process_count == 0:
+        raise ValueError("At least one process is required.")
+    if resource_count == 0:
+        raise ValueError("At least one resource type is required.")
     if process_count != len(maximum):
         raise ValueError("Allocation and maximum must have the same process count.")
-    if len(available) != len(RESOURCE_NAMES):
-        raise ValueError("Exactly three available resource values are required.")
+    if any(not isinstance(value, int) or isinstance(value, bool) for value in available):
+        raise ValueError("Available resource values must be whole numbers.")
 
     work = list(available)
     needs = []
     for held, claim in zip(allocation, maximum):
-        if len(held) != len(RESOURCE_NAMES) or len(claim) != len(RESOURCE_NAMES):
-            raise ValueError("Each process must have exactly three resource values.")
+        if not isinstance(held, (list, tuple)) or not isinstance(claim, (list, tuple)):
+            raise ValueError("Each process must have a row of resource values.")
+        if len(held) != resource_count or len(claim) != resource_count:
+            raise ValueError("Each process must have one value for every resource type.")
+        if any(not isinstance(value, int) or isinstance(value, bool)
+               for value in (*held, *claim)):
+            raise ValueError("Allocation and maximum values must be whole numbers.")
         if any(value < 0 for value in (*held, *claim)):
             raise ValueError("Resource values cannot be negative.")
         if any(held_value > claim_value for held_value, claim_value in zip(held, claim)):
@@ -272,6 +287,16 @@ def find_safe_sequence(allocation, maximum, available):
 
     if any(value < 0 for value in work):
         raise ValueError("Available resource values cannot be negative.")
+    resource_totals = [
+        available[resource] + sum(row[resource] for row in allocation)
+        for resource in range(resource_count)
+    ]
+    for process, claim in enumerate(maximum):
+        if any(value > resource_totals[r] for r, value in enumerate(claim)):
+            raise ValueError(
+                "Maximum claim for process P%d exceeds the total units of a resource."
+                % process
+            )
 
     finished = [False] * process_count
     sequence = []
@@ -433,6 +458,9 @@ class BankersWindow(QDialog):
         self.allocation_inputs = []
         self.maximum_inputs = []
         self.process_tiles = []
+        self.process_count = 5
+        self.resource_count = 3
+        self.resource_names = list(RESOURCE_NAMES)
         self.work_values = list(SAMPLE_AVAILABLE)
         self.completed_processes = set()
         self.sequence = []
@@ -445,9 +473,14 @@ class BankersWindow(QDialog):
         layout.setContentsMargins(22, 18, 22, 22)
         layout.setSpacing(10)
         self._build_header(layout)
-        self._build_available_panel(layout)
-        self._build_matrix_panel(layout)
-        self._build_simulation_panel(layout)
+        self.dynamic_container = QWidget()
+        self.dynamic_layout = QVBoxLayout(self.dynamic_container)
+        self.dynamic_layout.setContentsMargins(0, 0, 0, 0)
+        self.dynamic_layout.setSpacing(10)
+        layout.addWidget(self.dynamic_container)
+        self._build_available_panel(self.dynamic_layout)
+        self._build_matrix_panel(self.dynamic_layout)
+        self._build_simulation_panel(self.dynamic_layout)
         self._build_controls(layout)
 
         root = QVBoxLayout(self)
@@ -468,8 +501,26 @@ class BankersWindow(QDialog):
         header.addWidget(subtitle)
         parent_layout.addLayout(header)
 
+        dimensions = QHBoxLayout()
+        dimensions.addWidget(QLabel("Processes"))
+        self.process_count_input = QSpinBox()
+        self.process_count_input.setRange(1, 50)
+        self.process_count_input.setValue(self.process_count)
+        dimensions.addWidget(self.process_count_input)
+        dimensions.addWidget(QLabel("Resource types"))
+        self.resource_count_input = QSpinBox()
+        self.resource_count_input.setRange(1, 10)
+        self.resource_count_input.setValue(self.resource_count)
+        dimensions.addWidget(self.resource_count_input)
+        self.apply_dimensions_button = QPushButton("Apply Dimensions")
+        self.apply_dimensions_button.clicked.connect(self._apply_dimensions)
+        dimensions.addWidget(self.apply_dimensions_button)
+        dimensions.addStretch(1)
+        parent_layout.addLayout(dimensions)
+
     def _build_available_panel(self, parent_layout):
         panel = QFrame()
+        self.available_panel = panel
         panel.setObjectName("availablePanel")
         row = QHBoxLayout(panel)
         row.setContentsMargins(0, 4, 0, 4)
@@ -481,7 +532,11 @@ class BankersWindow(QDialog):
         intro.addWidget(label)
         row.addLayout(intro, 1)
 
-        for resource in RESOURCE_NAMES:
+        resource_content = QWidget()
+        resource_row = QHBoxLayout(resource_content)
+        resource_row.setContentsMargins(0, 0, 0, 0)
+        resource_row.setSpacing(4)
+        for resource in self.resource_names:
             resource_layout = QVBoxLayout()
             name = QLabel(resource)
             name.setObjectName("eyebrow")
@@ -510,7 +565,15 @@ class BankersWindow(QDialog):
             controls.addStretch(1)
             resource_layout.addWidget(name)
             resource_layout.addLayout(controls)
-            row.addLayout(resource_layout, 1)
+            resource_row.addLayout(resource_layout, 1)
+        resource_scroll = QScrollArea()
+        resource_scroll.setWidgetResizable(True)
+        resource_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        resource_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        resource_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        resource_scroll.setFixedHeight(76)
+        resource_scroll.setWidget(resource_content)
+        row.addWidget(resource_scroll, 3)
         parent_layout.addWidget(panel)
 
     @staticmethod
@@ -528,6 +591,7 @@ class BankersWindow(QDialog):
 
     def _build_matrix_panel(self, parent_layout):
         panel = QFrame()
+        self.matrix_panel = panel
         panel.setObjectName("panel")
         layout = QVBoxLayout(panel)
         layout.setContentsMargins(14, 10, 14, 10)
@@ -563,47 +627,48 @@ class BankersWindow(QDialog):
             )
         layout.addLayout(group_headers)
 
-        self.table = QTableWidget(5, 10)
-        self.table.setHorizontalHeaderLabels(
-            ["PID", "A", "B", "C", "A", "B", "C", "A", "B", "C"]
-        )
+        resource_headers = self.resource_names
+        headers = (["PID"] + ["Alloc " + name for name in resource_headers]
+                   + ["Max " + name for name in resource_headers]
+                   + ["Need " + name for name in resource_headers])
+        self.table = QTableWidget(self.process_count, len(headers))
+        self.table.setHorizontalHeaderLabels(headers)
         self.table.setAccessibleName("Banker's Algorithm resource ledger")
         self.table.setAccessibleDescription(
-            "Allocation, maximum claim, and remaining need for five processes."
+            "Allocation, maximum claim, and remaining need for each configured process."
         )
-        self.table.setVerticalHeaderLabels([""] * 5)
+        self.table.setVerticalHeaderLabels([""] * self.process_count)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.table.setSelectionMode(QTableWidget.SelectionMode.NoSelection)
         self.table.setAlternatingRowColors(True)
         self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.table.verticalHeader().setDefaultSectionSize(36)
         self.table.verticalHeader().setVisible(False)
-        self.table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.Stretch
-        )
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
         self.table.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.Fixed
-        )
-        self.table.setColumnWidth(0, 105)
+        self.table.setColumnWidth(0, 70)
+        for column in range(1, len(headers)):
+            self.table.setColumnWidth(column, 84)
+        self.table.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.table.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
-        for process in range(5):
+        for process in range(self.process_count):
             process_item = QTableWidgetItem("P%d" % process)
             process_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             process_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
             self.table.setItem(process, 0, process_item)
             self.allocation_inputs.append([])
             self.maximum_inputs.append([])
-            for resource in range(3):
+            for resource in range(self.resource_count):
                 allocation = ResourceField()
                 maximum = ResourceField()
                 allocation.setAccessibleName(
                     "Allocation for process P%d, Resource %s"
-                    % (process, RESOURCE_NAMES[resource])
+                    % (process, self.resource_names[resource])
                 )
                 maximum.setAccessibleName(
                     "Maximum claim for process P%d, Resource %s"
-                    % (process, RESOURCE_NAMES[resource])
+                    % (process, self.resource_names[resource])
                 )
                 allocation.setToolTip("Currently allocated units")
                 maximum.setToolTip("Maximum units this process may request")
@@ -617,19 +682,22 @@ class BankersWindow(QDialog):
                     process, 1 + resource, self._input_cell(allocation)
                 )
                 self.table.setCellWidget(
-                    process, 4 + resource, self._input_cell(maximum)
+                    process, 1 + self.resource_count + resource, self._input_cell(maximum)
                 )
                 need_item = QTableWidgetItem("0")
                 need_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 need_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
-                self.table.setItem(process, 7 + resource, need_item)
+                self.table.setItem(
+                    process, 1 + 2 * self.resource_count + resource, need_item
+                )
 
-        self.table.setFixedHeight(224)
+        self.table.setFixedHeight(min(224, 44 + 36 * self.process_count))
         layout.addWidget(self.table)
         parent_layout.addWidget(panel)
 
     def _build_simulation_panel(self, parent_layout):
         panel = QFrame()
+        self.simulation_panel = panel
         panel.setObjectName("panel")
         row = QHBoxLayout(panel)
         row.setContentsMargins(14, 12, 14, 12)
@@ -646,11 +714,14 @@ class BankersWindow(QDialog):
         progress_heading.addStretch(1)
         progress_heading.addWidget(self.state_label)
         progress.addLayout(progress_heading)
-        tiles = QHBoxLayout()
-        for process in range(5):
+        tiles_content = QWidget()
+        tiles = QHBoxLayout(tiles_content)
+        tiles.setContentsMargins(0, 0, 0, 0)
+        tiles.setSpacing(5)
+        for process in range(self.process_count):
             tile = QLabel("P%d\nWAITING" % process)
             tile.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            tile.setMinimumSize(82, 54)
+            tile.setMinimumSize(76, 48)
             tile.setStyleSheet(
                 "background: #FFFAFC; border: 1px solid #EABAC9; "
                 "border-radius: 8px; color: #704653; "
@@ -659,8 +730,17 @@ class BankersWindow(QDialog):
             )
             self.process_tiles.append(tile)
             tiles.addWidget(tile)
-        progress.addLayout(tiles)
-        self.progress_label = QLabel("Completed: 0 / 5  ·  Order: —")
+        tiles_scroll = QScrollArea()
+        tiles_scroll.setWidgetResizable(True)
+        tiles_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        tiles_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        tiles_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        tiles_scroll.setFixedHeight(66)
+        tiles_scroll.setWidget(tiles_content)
+        progress.addWidget(tiles_scroll)
+        self.progress_label = QLabel(
+            "Completed: 0 / %d  ·  Order: —" % self.process_count
+        )
         self.progress_label.setObjectName("muted")
         progress.addWidget(self.progress_label)
         self.status_label = QLabel("Edit the inputs, then step through or run the check.")
@@ -676,7 +756,8 @@ class BankersWindow(QDialog):
         work_title = QLabel("Work")
         work_title.setObjectName("eyebrow")
         work_layout.addWidget(work_title)
-        self.work_label = QLabel("A  3      B  3      C  2")
+        self.work_label = QLabel()
+        self._update_work_label()
         self.work_label.setStyleSheet(
             'font-family: "Nunito"; font-size: 12pt; '
             "font-weight: 600; color: #704653;"
@@ -777,15 +858,66 @@ class BankersWindow(QDialog):
         self._inputs_changed()
 
     def _load_sample(self):
+        if self.process_count != 5 or self.resource_count != 3:
+            self.process_count_input.setValue(5)
+            self.resource_count_input.setValue(3)
+            self._apply_dimensions(restart=False)
         self._apply_example(SAMPLE_AVAILABLE, SAMPLE_ALLOCATION, SAMPLE_MAXIMUM)
 
+    @staticmethod
+    def _make_resource_names(count):
+        names = []
+        for index in range(count):
+            if index < 26:
+                names.append(chr(ord("A") + index))
+            else:
+                names.append("R%d" % (index + 1))
+        return names
+
+    def _apply_dimensions(self, _checked=False, restart=True):
+        self.process_count = self.process_count_input.value()
+        self.resource_count = self.resource_count_input.value()
+        self.resource_names = self._make_resource_names(self.resource_count)
+        self._refreshing = True
+        while self.dynamic_layout.count():
+            item = self.dynamic_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+                widget.deleteLater()
+        self.available_inputs = []
+        self.allocation_inputs = []
+        self.maximum_inputs = []
+        self.process_tiles = []
+        self.work_values = [0] * self.resource_count
+        self.completed_processes = set()
+        self.sequence = []
+        self._build_available_panel(self.dynamic_layout)
+        self._build_matrix_panel(self.dynamic_layout)
+        self._build_simulation_panel(self.dynamic_layout)
+        self._refreshing = False
+        if restart:
+            self._restart_simulation()
+
     def _apply_example(self, available, allocation, maximum):
+        process_count = len(allocation)
+        resource_count = len(available)
+        if process_count != len(maximum):
+            raise ValueError("Allocation and maximum must have the same process count.")
+        if (process_count != self.process_count
+                or resource_count != self.resource_count):
+            self.process_count_input.setValue(process_count)
+            self.resource_count_input.setValue(resource_count)
+            self._apply_dimensions(restart=False)
         self._set_highlight([])
         self._refreshing = True
         for index, value in enumerate(available):
             self.available_inputs[index].setValue(value)
-        for process in range(5):
-            for resource in range(3):
+        for process in range(self.process_count):
+            if len(allocation[process]) != self.resource_count or len(maximum[process]) != self.resource_count:
+                self._refreshing = False
+                raise ValueError("Every process must have one value per resource type.")
+            for resource in range(self.resource_count):
                 self.allocation_inputs[process][resource].setValue(
                     allocation[process][resource]
                 )
@@ -805,11 +937,21 @@ class BankersWindow(QDialog):
         """
         keep_unsafe = random.random() < 0.25
         for _ in range(500):
-            maximum = [[random.randint(0, 9) for _ in range(3)] for _ in range(5)]
+            maximum = [
+                [random.randint(0, 9) for _ in range(self.resource_count)]
+                for _ in range(self.process_count)
+            ]
             allocation = [
                 [random.randint(0, claim) for claim in row] for row in maximum
             ]
-            available = [random.randint(0, 5) for _ in range(3)]
+            available = [
+                max(
+                    random.randint(0, 5),
+                    max(maximum[p][r] for p in range(self.process_count))
+                    - sum(allocation[p][r] for p in range(self.process_count)),
+                )
+                for r in range(self.resource_count)
+            ]
             if keep_unsafe or find_safe_sequence(allocation, maximum, available):
                 break
         self._apply_example(available, allocation, maximum)
@@ -823,13 +965,21 @@ class BankersWindow(QDialog):
         self.completed_processes.clear()
         self.sequence.clear()
         self.work_values = [value.value() for value in self.available_inputs]
+        resource_totals = [
+            self.available_inputs[resource].value()
+            + sum(self.allocation_inputs[p][resource].value()
+                  for p in range(self.process_count))
+            for resource in range(self.resource_count)
+        ]
         valid = True
-        for process in range(5):
-            for resource in range(3):
+        for process in range(self.process_count):
+            for resource in range(self.resource_count):
                 held = self.allocation_inputs[process][resource].value()
                 claim = self.maximum_inputs[process][resource].value()
-                item = self.table.item(process, 7 + resource)
-                if held > claim:
+                item = self.table.item(
+                    process, 1 + 2 * self.resource_count + resource
+                )
+                if held > claim or claim > resource_totals[resource]:
                     new_text = "!"
                     item.setForeground(QColor("#C45B7A"))
                     valid = False
@@ -846,7 +996,8 @@ class BankersWindow(QDialog):
             self._set_state("READY", "ready")
         else:
             self.status_label.setText(
-                "Invalid input: Allocation cannot exceed Max. Correct the marked Need cells."
+                "Invalid input: Allocation cannot exceed Max, and each Max claim "
+                "must fit the total units available for that resource."
             )
             self._set_state("INVALID", "invalid")
         self.step_button.setEnabled(valid)
@@ -855,7 +1006,7 @@ class BankersWindow(QDialog):
     def _step(self):
         if not self._inputs_are_valid():
             return
-        for process in range(5):
+        for process in range(self.process_count):
             if process in self.completed_processes:
                 continue
             needs = self._need_for(process)
@@ -885,7 +1036,7 @@ class BankersWindow(QDialog):
                     )
                 )
                 self._set_state("IN PROGRESS", "progress")
-                if len(self.completed_processes) == 5:
+                if len(self.completed_processes) == self.process_count:
                     self.status_label.setText(
                         "SAFE STATE. Every process can finish in this order: %s."
                         % "  →  ".join("P%d" % item for item in self.sequence)
@@ -897,7 +1048,7 @@ class BankersWindow(QDialog):
 
         blocked = [
             "P%d" % process
-            for process in range(5)
+        for process in range(self.process_count)
             if process not in self.completed_processes
         ]
         self.status_label.setText(
@@ -909,18 +1060,25 @@ class BankersWindow(QDialog):
         self.run_button.setEnabled(False)
 
     def _run_all(self):
-        while self.step_button.isEnabled() and len(self.completed_processes) < 5:
+        while (self.step_button.isEnabled()
+               and len(self.completed_processes) < self.process_count):
             self._step()
 
     def _inputs_are_valid(self):
-        for process in range(5):
-            for resource in range(3):
-                if (
-                    self.allocation_inputs[process][resource].value()
-                    > self.maximum_inputs[process][resource].value()
-                ):
+        resource_totals = [
+            self.available_inputs[resource].value()
+            + sum(self.allocation_inputs[p][resource].value()
+                  for p in range(self.process_count))
+            for resource in range(self.resource_count)
+        ]
+        for process in range(self.process_count):
+            for resource in range(self.resource_count):
+                held = self.allocation_inputs[process][resource].value()
+                claim = self.maximum_inputs[process][resource].value()
+                if held > claim or claim > resource_totals[resource]:
                     self.status_label.setText(
-                        "Invalid input: Allocation cannot exceed Max."
+                        "Invalid input: Allocation cannot exceed Max, and Max "
+                        "cannot exceed the total units of that resource."
                     )
                     self._set_state("INVALID", "invalid")
                     return False
@@ -930,7 +1088,7 @@ class BankersWindow(QDialog):
         return [
             self.maximum_inputs[process][resource].value()
             - self.allocation_inputs[process][resource].value()
-            for resource in range(3)
+            for resource in range(self.resource_count)
         ]
 
     def _update_visuals(self):
@@ -949,12 +1107,16 @@ class BankersWindow(QDialog):
             )
         order = " > ".join("P%d" % process for process in self.sequence)
         self.progress_label.setText(
-            "Completed: %d / 5  ·  Order: %s"
-            % (len(self.completed_processes), order or "—")
+            "Completed: %d / %d  ·  Order: %s"
+            % (len(self.completed_processes), self.process_count, order or "—")
         )
-        self.work_label.setText(
-            "A  %d      B  %d      C  %d" % tuple(self.work_values)
-        )
+        self._update_work_label()
+
+    def _update_work_label(self):
+        self.work_label.setText("     ".join(
+            "%s  %d" % (name, value)
+            for name, value in zip(self.resource_names, self.work_values)
+        ))
 
     def _set_state(self, text, kind):
         palette = {

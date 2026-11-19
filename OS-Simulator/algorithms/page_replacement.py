@@ -1,8 +1,12 @@
 def _validate_input(pages, frame_count):
+    if not isinstance(frame_count, int) or isinstance(frame_count, bool):
+        raise ValueError("Number of frames must be a whole number.")
     if frame_count <= 0:
         raise ValueError("Number of frames must be greater than zero.")
     if not pages:
         raise ValueError("Page reference string cannot be empty.")
+    if any(not isinstance(page, int) or isinstance(page, bool) for page in pages):
+        raise ValueError("Page references must be whole numbers.")
     if any(page < 0 for page in pages):
         raise ValueError("Page numbers cannot be negative.")
 
