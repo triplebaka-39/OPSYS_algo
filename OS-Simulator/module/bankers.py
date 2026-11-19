@@ -24,6 +24,11 @@ from PySide6.QtWidgets import (
 )
 
 from module.theme import style_dashboard_button
+from module.window_utils import (
+    center_adaptive_window,
+    make_window_adaptive,
+    wrap_in_scroll_area,
+)
 
 
 class AnimatedButton(QPushButton):
@@ -328,7 +333,9 @@ class BankersWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Banker's Algorithm | OS Simulator")
-        self.resize(1000, 850)
+        make_window_adaptive(
+            self, preferred_width=1000, preferred_height=760, min_width=750, min_height=520
+        )
         self.setStyleSheet(
             """
             QDialog {
@@ -491,16 +498,25 @@ class BankersWindow(QDialog):
         self._build_simulation_panel(self.dynamic_layout)
         self._build_controls(layout)
 
+        layout.addStretch(1)
+        self.btnBackToDashboard = QPushButton("Back to Dashboard")
+        style_dashboard_button(self.btnBackToDashboard)
+        self.btnBackToDashboard.setAccessibleName("Back to Dashboard")
+        self.btnBackToDashboard.setToolTip("Close this simulator and return to the dashboard.")
+        self.btnBackToDashboard.clicked.connect(self.close)
+        layout.addWidget(self.btnBackToDashboard)
+        self.dashboard_button = self.btnBackToDashboard
+
         root = QVBoxLayout(self)
-        root.setContentsMargins(0, 0, 0, 0)
-        root.addWidget(content)
+        root.setContentsMargins(16, 10, 16, 12)
+        root.setSpacing(8)
+        scroll = wrap_in_scroll_area(content, self)
+        root.addWidget(scroll, 1)
+
         self._load_sample()
 
     def center_window(self):
-        screen = self.screen().availableGeometry()
-        window = self.frameGeometry()
-        window.moveCenter(screen.center())
-        self.move(window.topLeft())
+        center_adaptive_window(self)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -520,26 +536,47 @@ class BankersWindow(QDialog):
         parent_layout.addLayout(header)
 
         dimensions = QHBoxLayout()
-        dimensions.setSpacing(8)
-        dimensions.addWidget(QLabel("Processes"))
+        dimensions.setSpacing(10)
+        dimensions.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+
+        # "Processes" label stacked above its spinbox
+        proc_col = QWidget()
+        proc_vbox = QVBoxLayout(proc_col)
+        proc_vbox.setContentsMargins(0, 0, 0, 0)
+        proc_vbox.setSpacing(2)
+        proc_vbox.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        proc_lbl = QLabel("Processes")
+        proc_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.process_count_input = QSpinBox()
         self.process_count_input.setRange(1, 50)
         self.process_count_input.setValue(self.process_count)
         self.process_count_input.setFixedWidth(58)
-        dimensions.addWidget(self.process_count_input)
-        dimensions.addWidget(QLabel("Resource types"))
+        proc_vbox.addWidget(proc_lbl)
+        proc_vbox.addWidget(self.process_count_input)
+        dimensions.addWidget(proc_col)
+
+        # "Resource types" label stacked above its spinbox
+        res_col = QWidget()
+        res_vbox = QVBoxLayout(res_col)
+        res_vbox.setContentsMargins(0, 0, 0, 0)
+        res_vbox.setSpacing(2)
+        res_vbox.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        res_lbl = QLabel("Resource types")
+        res_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.resource_count_input = QSpinBox()
         self.resource_count_input.setRange(1, 10)
         self.resource_count_input.setValue(self.resource_count)
         self.resource_count_input.setFixedWidth(58)
-        dimensions.addWidget(self.resource_count_input)
-        self.dimensions_layout = dimensions
+        res_vbox.addWidget(res_lbl)
+        res_vbox.addWidget(self.resource_count_input)
+        dimensions.addWidget(res_col)
 
         self.available_panel = QFrame()
         self.available_panel.setObjectName("availablePanel")
         available_layout = QHBoxLayout(self.available_panel)
         available_layout.setContentsMargins(0, 0, 0, 0)
         available_layout.setSpacing(6)
+        available_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         available_label = QLabel("Available resources")
         available_label.setObjectName("eyebrow")
         available_label.setSizePolicy(
@@ -565,14 +602,13 @@ class BankersWindow(QDialog):
         self.resource_scroll.setWidget(self.resource_content)
         available_layout.addWidget(self.resource_scroll, 1)
         dimensions.addWidget(self.available_panel, 1)
-        parent_layout.addLayout(dimensions)
-
-        apply_row = QHBoxLayout()
-        apply_row.addStretch(1)
         self.apply_dimensions_button = QPushButton("Apply Dimensions")
         self.apply_dimensions_button.clicked.connect(self._apply_dimensions)
-        apply_row.addWidget(self.apply_dimensions_button)
-        parent_layout.addLayout(apply_row)
+        dimensions.addWidget(
+            self.apply_dimensions_button, 0, Qt.AlignmentFlag.AlignVCenter
+        )
+        self.dimensions_layout = dimensions
+        parent_layout.addLayout(dimensions)
 
     def _build_available_panel(self):
         while self.resource_row.count():
@@ -931,13 +967,6 @@ class BankersWindow(QDialog):
         row.addWidget(self.random_button)
         row.addWidget(self.run_button)
         parent_layout.addLayout(row)
-        self.dashboard_button = QPushButton("Back to Dashboard")
-        style_dashboard_button(self.dashboard_button)
-        self.dashboard_button.setAccessibleName("Back to Dashboard")
-        self.dashboard_button.setToolTip("Close this simulator and return to the dashboard.")
-        self.dashboard_button.clicked.connect(self.close)
-        parent_layout.addStretch(1)
-        parent_layout.addWidget(self.dashboard_button)
 
     @staticmethod
     def _input_cell(field):

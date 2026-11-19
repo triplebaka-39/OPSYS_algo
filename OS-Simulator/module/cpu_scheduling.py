@@ -8,9 +8,16 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QTableWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
 
 from algorithms.cpu_scheduling import fcfs, priority_scheduling, round_robin, sjf
+from module.window_utils import (
+    center_adaptive_window,
+    make_window_adaptive,
+    wrap_in_scroll_area,
+)
 from ui_cpu_scheduling import Ui_Dialog
 
 
@@ -41,17 +48,29 @@ def setup_tables(dialog):
 class CpuSchedulingWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setWindowTitle("CPU Scheduling")
+
+        root_layout = QVBoxLayout(self)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+
+        container = QWidget()
         self.ui = Ui_Dialog()
-        self.ui.setupUi(self)
-        self.btnBackToDashboard = QPushButton("Back to Dashboard", self)
+        self.ui.setupUi(container)
+        self.setStyleSheet("QDialog { background-color: #FFF0F3; }")
+
+        self.btnBackToDashboard = QPushButton("Back to Dashboard", container)
         self.btnBackToDashboard.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
         )
         self.ui.verticalLayout.addStretch(1)
         self.ui.verticalLayout.addWidget(self.btnBackToDashboard)
-        self.setWindowTitle("CPU Scheduling")
-        self.resize(1000, 850)
-        self.center_window()
+
+        scroll = wrap_in_scroll_area(container, self)
+        root_layout.addWidget(scroll)
+
+        make_window_adaptive(
+            self, preferred_width=1000, preferred_height=760, min_width=750, min_height=520
+        )
         self.last_output = None
 
         self.ui.cmbAlgorithm.addItems([
@@ -73,10 +92,7 @@ class CpuSchedulingWindow(QDialog):
         self.update_quantum_visibility(self.ui.cmbAlgorithm.currentText())
 
     def center_window(self):
-        screen = self.screen().availableGeometry()
-        window = self.frameGeometry()
-        window.moveCenter(screen.center())
-        self.move(window.topLeft())
+        center_adaptive_window(self)
 
     def add_process(self, pid=None, arrival=None, burst=None, priority=None):
         table = self.ui.tblInput

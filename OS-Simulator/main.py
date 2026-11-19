@@ -1,4 +1,5 @@
 
+import ctypes
 import sys
 
 from PySide6.QtWidgets import (
@@ -21,6 +22,11 @@ from module.segmentation import SegmentationWindow
 from module.multiprogramming import MultiprogrammingWindow
 from module.theme import apply_application_palette
 from module.typography import load_application_fonts
+from module.window_utils import (
+    center_adaptive_window,
+    get_app_icon,
+    make_window_adaptive,
+)
 from ui_main_window import Ui_MainWindow
 
 
@@ -34,12 +40,9 @@ class ModuleWindow(QDialog):
         super().__init__()
 
         self.setWindowTitle(module_name)
-
-        # Lock module window size
-        self.setFixedSize(650, 450)
-
-        # Center module window
-        self.center_window()
+        make_window_adaptive(
+            self, preferred_width=650, preferred_height=450, min_width=450, min_height=320
+        )
 
         # Layout
         layout = QVBoxLayout(self)
@@ -75,11 +78,7 @@ class ModuleWindow(QDialog):
         layout.addWidget(close_button)
 
     def center_window(self):
-        screen = self.screen().availableGeometry()
-        window = self.frameGeometry()
-
-        window.moveCenter(screen.center())
-        self.move(window.topLeft())
+        center_adaptive_window(self)
 
 
 # ==========================================
@@ -96,12 +95,9 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.setWindowTitle("OS Simulator")
-
-        # Lock dashboard size
-        self.setFixedSize(480, 500)
-
-        # Center dashboard
-        self.center_window()
+        make_window_adaptive(
+            self, preferred_width=480, preferred_height=520, min_width=420, min_height=460
+        )
 
         # Store references to opened module windows
         self.module_windows = []
@@ -138,11 +134,7 @@ class MainWindow(QMainWindow):
         )
 
     def center_window(self):
-        screen = self.screen().availableGeometry()
-        window = self.frameGeometry()
-
-        window.moveCenter(screen.center())
-        self.move(window.topLeft())
+        center_adaptive_window(self)
 
     def open_module(self, module_name):
 
@@ -216,12 +208,23 @@ class MainWindow(QMainWindow):
 # ==========================================
 
 if __name__ == "__main__":
+    try:
+        myappid = "ossimulator.app.v1"
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    except Exception:
+        pass
 
     app = QApplication(sys.argv)
+    icon = get_app_icon()
+    if not icon.isNull():
+        app.setWindowIcon(icon)
+
     apply_application_palette(app)
     load_application_fonts(app)
 
     window = MainWindow()
+    if not icon.isNull():
+        window.setWindowIcon(icon)
     window.show()
 
     sys.exit(app.exec())

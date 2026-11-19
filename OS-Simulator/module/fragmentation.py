@@ -25,6 +25,11 @@ from PySide6.QtWidgets import (
 )
 
 from module.theme import style_dashboard_button
+from module.window_utils import (
+    center_adaptive_window,
+    make_window_adaptive,
+    wrap_in_scroll_area,
+)
 
 
 DEFAULT_BLOCKS = (100, 300, 200)
@@ -37,7 +42,9 @@ class FragmentationWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Fragmentation - OS Simulator")
-        self.setFixedSize(1060, 820)
+        make_window_adaptive(
+            self, preferred_width=1060, preferred_height=780, min_width=750, min_height=520
+        )
         self._center_window()
 
         self.block_rows = []
@@ -57,22 +64,21 @@ class FragmentationWindow(QDialog):
         self._configuration_changed()
 
     def _center_window(self):
-        screen = self.screen().availableGeometry()
-        window = self.frameGeometry()
-        window.moveCenter(screen.center())
-        self.move(window.topLeft())
+        center_adaptive_window(self)
 
     def _build_ui(self):
         root_layout = QVBoxLayout(self)
-        root_layout.setContentsMargins(12, 8, 12, 11)
-        root_layout.setSpacing(8)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+        root_layout.setSpacing(0)
 
         content = QWidget()
         content.setObjectName("fragmentationContent")
-        root_layout.addWidget(content, 1)
         content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setContentsMargins(12, 8, 12, 11)
         content_layout.setSpacing(8)
+
+        scroll = wrap_in_scroll_area(content, self)
+        root_layout.addWidget(scroll, 1)
 
         header_layout = QVBoxLayout()
         header_layout.setSpacing(0)

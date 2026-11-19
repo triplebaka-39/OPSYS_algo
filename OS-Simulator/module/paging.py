@@ -26,6 +26,11 @@ from PySide6.QtWidgets import (
 )
 
 from module.theme import style_dashboard_button
+from module.window_utils import (
+    center_adaptive_window,
+    make_window_adaptive,
+    wrap_in_scroll_area,
+)
 
 
 DEFAULT_PROCESS_SIZE = 1700
@@ -89,15 +94,9 @@ class PagingWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Paging - OS Simulator")
-        available = self.screen().availableGeometry()
-        minimum_width = min(900, max(760, available.width() - 32))
-        minimum_height = min(640, max(560, available.height() - 32))
-        self.setMinimumSize(minimum_width, minimum_height)
-        self.resize(
-            min(1180, max(minimum_width, available.width() - 32)),
-            min(760, max(minimum_height, available.height() - 40)),
+        make_window_adaptive(
+            self, preferred_width=1100, preferred_height=760, min_width=760, min_height=520
         )
-        self.center_window()
 
         self.page_to_frame = {}
         self.processed_pages = set()
@@ -117,21 +116,19 @@ class PagingWindow(QDialog):
         self._refresh_configuration()
 
     def center_window(self):
-        screen = self.screen().availableGeometry()
-        window = self.frameGeometry()
-        window.moveCenter(screen.center())
-        self.move(window.topLeft())
+        center_adaptive_window(self)
 
     def _build_ui(self):
         outer_layout = QVBoxLayout(self)
-        outer_layout.setContentsMargins(16, 12, 16, 11)
-        outer_layout.setSpacing(8)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
 
         content = QWidget()
         content.setObjectName("pagingContent")
-        outer_layout.addWidget(content, 1)
+        scroll = wrap_in_scroll_area(content, self)
+        outer_layout.addWidget(scroll, 1)
         content_layout = QVBoxLayout(content)
-        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setContentsMargins(16, 12, 16, 11)
         content_layout.setSpacing(8)
 
         header_layout = QVBoxLayout()

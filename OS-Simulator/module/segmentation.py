@@ -20,6 +20,11 @@ from PySide6.QtCore import Qt
 
 from algorithms.segmentation import translate_segment_address
 from module.theme import style_dashboard_button
+from module.window_utils import (
+    center_adaptive_window,
+    make_window_adaptive,
+    wrap_in_scroll_area,
+)
 
 SEGMENT_COLORS = [
     "#F6B6C8",  # Rose
@@ -37,8 +42,9 @@ class SegmentationWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Segmentation - OS Simulator")
-        self.setFixedSize(1000, 750)
-        self.center_window()
+        make_window_adaptive(
+            self, preferred_width=1000, preferred_height=740, min_width=750, min_height=520
+        )
 
         self._build_ui()
         self._apply_stylesheet()
@@ -46,13 +52,15 @@ class SegmentationWindow(QDialog):
         self.translate()
 
     def center_window(self):
-        screen = self.screen().availableGeometry()
-        window = self.frameGeometry()
-        window.moveCenter(screen.center())
-        self.move(window.topLeft())
+        center_adaptive_window(self)
 
     def _build_ui(self):
-        main_layout = QVBoxLayout(self)
+        root_layout = QVBoxLayout(self)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+
+        container = QWidget()
+        container.setObjectName("container")
+        main_layout = QVBoxLayout(container)
         main_layout.setContentsMargins(24, 20, 24, 11)
         main_layout.setSpacing(12)
 
@@ -144,6 +152,9 @@ class SegmentationWindow(QDialog):
         style_dashboard_button(self.btnBackToDashboard)
         self.btnBackToDashboard.clicked.connect(self.close)
         main_layout.addWidget(self.btnBackToDashboard)
+
+        scroll = wrap_in_scroll_area(container, self)
+        root_layout.addWidget(scroll)
 
     def _load_default_segments(self):
         """Standard operating systems textbook segmentation example."""

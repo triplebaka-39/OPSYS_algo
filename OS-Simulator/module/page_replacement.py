@@ -32,6 +32,11 @@ from algorithms.page_replacement import (
 )
 from module.theme import style_dashboard_button
 from module.typography import load_application_fonts
+from module.window_utils import (
+    center_adaptive_window,
+    make_window_adaptive,
+    wrap_in_scroll_area,
+)
 
 
 class PageReplacementWindow(QDialog):
@@ -40,9 +45,10 @@ class PageReplacementWindow(QDialog):
         super().__init__(parent)
 
         self.setWindowTitle("Page Replacement - OS Simulator")
-        self.setFixedSize(900, 720)
+        make_window_adaptive(
+            self, preferred_width=950, preferred_height=740, min_width=720, min_height=500
+        )
 
-        self.center_window()
         self.create_ui()
         self.apply_stylesheet()
 
@@ -62,12 +68,7 @@ class PageReplacementWindow(QDialog):
     # -----------------------------------
 
     def center_window(self):
-
-        screen = self.screen().availableGeometry()
-        window = self.frameGeometry()
-
-        window.moveCenter(screen.center())
-        self.move(window.topLeft())
+        center_adaptive_window(self)
 
     # -----------------------------------
     # CREATE GUI
@@ -76,7 +77,12 @@ class PageReplacementWindow(QDialog):
     def create_ui(self):
 
         # Main layout
-        main_layout = QVBoxLayout(self)
+        root_layout = QVBoxLayout(self)
+        root_layout.setContentsMargins(0, 0, 0, 0)
+
+        container = QWidget()
+        container.setObjectName("container")
+        main_layout = QVBoxLayout(container)
         main_layout.setContentsMargins(24, 20, 24, 11)
         main_layout.setSpacing(15)
 
@@ -237,6 +243,9 @@ class PageReplacementWindow(QDialog):
 
         main_layout.addStretch(1)
         main_layout.addWidget(self.btnBackToDashboard)
+
+        scroll = wrap_in_scroll_area(container, self)
+        root_layout.addWidget(scroll)
 
         # Example input
         self.txtReferenceString.setText(

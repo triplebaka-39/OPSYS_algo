@@ -1,5 +1,6 @@
 """Load the simulator's bundled typefaces for use across its Qt windows."""
 
+import sys
 from pathlib import Path
 
 from PySide6.QtGui import QFont, QFontDatabase
@@ -15,9 +16,12 @@ FONT_FILES = (
 
 
 def load_application_fonts(app: QApplication):
-    fonts_directory = (
-        Path(__file__).resolve().parent.parent / "fonts" / "Nunito" / "static"
-    )
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        fonts_directory = Path(sys._MEIPASS) / "fonts" / "Nunito" / "static"
+    else:
+        fonts_directory = (
+            Path(__file__).resolve().parent.parent / "fonts" / "Nunito" / "static"
+        )
     for filename in FONT_FILES:
         font_path = fonts_directory / filename
         font_id = QFontDatabase.addApplicationFont(str(font_path))
